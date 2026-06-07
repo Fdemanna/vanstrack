@@ -1,13 +1,16 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout/Layout';
-import Login from './pages/Login/Login';
-import Home from './pages/Home/Home';
-import Deliveries from './pages/Deliveries/Deliveries';
-import Expenses from './pages/Expenses/Expenses';
-import Profile from './pages/Profile/Profile';
-import Admin from './pages/Admin/Admin';
-import ForcePasswordChange from './pages/ForcePasswordChange/ForcePasswordChange';
+
+// Carga perezosa (Lazy Loading) de páginas para optimizar bundle size
+const Login = lazy(() => import('./pages/Login/Login'));
+const Home = lazy(() => import('./pages/Home/Home'));
+const Deliveries = lazy(() => import('./pages/Deliveries/Deliveries'));
+const Expenses = lazy(() => import('./pages/Expenses/Expenses'));
+const Profile = lazy(() => import('./pages/Profile/Profile'));
+const Admin = lazy(() => import('./pages/Admin/Admin'));
+const ForcePasswordChange = lazy(() => import('./pages/ForcePasswordChange/ForcePasswordChange'));
 
 function ProtectedRoute({ children }) {
   const { session, profile, loading } = useAuth();
@@ -93,51 +96,59 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          {/* Public */}
-          <Route
-            path="/login"
-            element={
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            }
-          />
-
-          <Route
-            path="/force-password-change"
-            element={
-              <ForcePasswordProtectedRoute>
-                <ForcePasswordChange />
-              </ForcePasswordProtectedRoute>
-            }
-          />
-
-          {/* Protected — App Shell */}
-          <Route
-            element={
-              <ProtectedRoute>
-                <Layout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Home />} />
-            <Route path="deliveries" element={<Deliveries />} />
-            <Route path="expenses" element={<Expenses />} />
-            <Route path="profile" element={<Profile />} />
+        <Suspense
+          fallback={
+            <div className="loading-screen">
+              <div className="spinner" />
+            </div>
+          }
+        >
+          <Routes>
+            {/* Public */}
             <Route
-              path="admin"
+              path="/login"
               element={
-                <AdminRoute>
-                  <Admin />
-                </AdminRoute>
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
               }
             />
-          </Route>
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            <Route
+              path="/force-password-change"
+              element={
+                <ForcePasswordProtectedRoute>
+                  <ForcePasswordChange />
+                </ForcePasswordProtectedRoute>
+              }
+            />
+
+            {/* Protected — App Shell */}
+            <Route
+              element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Home />} />
+              <Route path="deliveries" element={<Deliveries />} />
+              <Route path="expenses" element={<Expenses />} />
+              <Route path="profile" element={<Profile />} />
+              <Route
+                path="admin"
+                element={
+                  <AdminRoute>
+                    <Admin />
+                  </AdminRoute>
+                }
+              />
+            </Route>
+
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
       </AuthProvider>
     </BrowserRouter>
   );
