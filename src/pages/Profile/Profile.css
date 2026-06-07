@@ -1,0 +1,127 @@
+/* ── Profile Page ── */
+.profile-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.profile-card__header {
+  padding: var(--space-xl) var(--space-md);
+  background:
+    linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(34, 211, 238, 0.08));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.profile-card__avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: white;
+  box-shadow: 0 0 24px var(--color-primary-glow);
+}
+
+.profile-card__name {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.profile-card__body {
+  padding: var(--space-md);
+}
+
+.profile-card__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) 0;
+}
+
+.profile-card__row + .profile-card__row {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.profile-card__row-label {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.profile-card__row-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.profile-card__actions {
+  padding: var(--space-md);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.profile-card__name-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+  width: 100%;
+}
+
+.profile-card__edit-btn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.profile-card__edit-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.profile-card__edit-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.profile-card__edit-form {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  width: 100%;
+  max-width: 280px;
+  justify-content: center;
+}
+
+.profile-card__edit-input {
+  flex: 1;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.95rem;
+  height: 38px;
+}
+
+.profile-card__edit-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.profile-card__error {
+  color: var(--color-danger);
+  font-size: 0.75rem;
+  margin-top: var(--space-xs);
+  text-align: center;
+  width: 100%;
+}

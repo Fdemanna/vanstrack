@@ -1,0 +1,250 @@
+/* ── Expenses Page ── */
+.expenses-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.expenses-header__filter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  min-height: 36px;
+  white-space: nowrap;
+}
+
+.filter-chip:hover {
+  border-color: var(--border-default);
+}
+
+.filter-chip--active {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: var(--color-primary-light);
+}
+
+.filter-chip__icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* ── Date Picker Row ── */
+.date-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+  padding: var(--space-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.date-nav__btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.date-nav__btn:hover {
+  background: var(--bg-surface-2);
+  color: var(--text-primary);
+}
+
+.date-nav__btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.date-nav__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  min-width: 160px;
+  text-align: center;
+  cursor: pointer;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+
+.date-nav__label:hover {
+  background: var(--bg-surface-2);
+}
+
+.date-nav__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* ── Expense Card ── */
+.expense-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  transition: all var(--transition-fast);
+}
+
+.expense-card:hover {
+  border-color: var(--border-default);
+}
+
+.expense-card + .expense-card {
+  margin-top: var(--space-sm);
+}
+
+.expense-card__worker {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-xs);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.expense-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.expense-card__concept {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  flex: 1;
+}
+
+.expense-card__amount {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-warning-light);
+  white-space: nowrap;
+}
+
+.expense-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.expense-card__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.expense-card__meta-item svg {
+  width: 14px;
+  height: 14px;
+}
+
+.expense-card__van-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+/* ── Summary Bar ── */
+.summary-bar {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.summary-card {
+  flex: 1;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-sm) var(--space-md);
+  text-align: center;
+}
+
+.summary-card__value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.summary-card__value--expense {
+  color: var(--color-warning-light);
+}
+
+.summary-card__value--count {
+  color: var(--color-primary-light);
+}
+
+.summary-card__label {
+  font-size: 0.6875rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* ── Offline Pending Sync States ── */
+.expense-card--pending {
+  opacity: 0.7;
+  border: 1.5px dashed var(--color-warning) !important;
+  background: rgba(245, 158, 11, 0.03);
+}
+
+.expense-card__concept {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.expense-card__concept .sync-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--color-warning);
+  animation: pulse-sync 2s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+.expense-card__pending-text {
+  font-size: 0.6875rem;
+  color: var(--color-warning);
+  font-weight: 500;
+  margin-left: auto;
+}
+
+@keyframes pulse-sync {
+  0%, 100% { opacity: 0.6; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.05); }
+}

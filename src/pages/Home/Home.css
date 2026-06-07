@@ -1,0 +1,164 @@
+/* ── Home Page Dashboard ── */
+
+/* Dashboard Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  animation: fadeUp 0.3s ease;
+}
+
+.dashboard-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 100px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.dashboard-card:hover {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-card--full {
+  grid-column: span 2;
+  gap: var(--space-sm);
+}
+
+.dashboard-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--text-secondary);
+}
+
+.dashboard-card__icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.dashboard-card__title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.dashboard-card__value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-top: var(--space-xs);
+  letter-spacing: -0.02em;
+}
+
+/* Active Fleet / Assignments */
+.fleet-section {
+  margin-top: var(--space-lg);
+  animation: fadeUp 0.4s ease;
+}
+
+.fleet-section__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: var(--space-md);
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.fleet-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.fleet-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+}
+
+.fleet-item:hover {
+  border-color: var(--border-default);
+}
+
+.fleet-item__van {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.fleet-item__color {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.fleet-item__driver {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.fleet-item__driver strong {
+  color: var(--text-primary);
+}
+
+.fleet-item__driver--empty {
+  color: var(--color-success-light);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.fleet-item__driver--active {
+  color: var(--color-warning-light);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(245, 158, 11, 0.1);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+/* ── Tu Vehículo highlight ── */
+.fleet-item--mine {
+  background: rgba(99, 102, 241, 0.06);
+  border-radius: var(--radius-md);
+}
+
+.fleet-item__mine-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  margin-left: 6px;
+}

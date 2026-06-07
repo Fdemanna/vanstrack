@@ -1,0 +1,108 @@
+/* ── Login Page ── */
+.login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: var(--space-md);
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.08), transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(34, 211, 238, 0.05), transparent 50%),
+    var(--bg-base);
+}
+
+.login__card {
+  width: 100%;
+  max-width: 400px;
+  padding: var(--space-xl);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  animation: fadeUp 0.5s ease;
+}
+
+.login__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.login__logo-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px var(--color-primary-glow);
+}
+
+.login__logo-icon svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.login__brand {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--text-primary), var(--color-primary-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.login__tagline {
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: 0.8125rem;
+  margin-bottom: var(--space-xl);
+}
+
+.login__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.login__footer {
+  text-align: center;
+  margin-top: var(--space-lg);
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.login__title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: var(--space-md);
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.login__toggle {
+  text-align: center;
+  margin-top: var(--space-md);
+}
+
+.btn-link {
+  font-size: 0.8125rem;
+  color: var(--color-primary-light);
+  font-weight: 500;
+  background: none;
+  border: none;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.btn-link:hover {
+  color: var(--color-accent-light);
+  background: rgba(99, 102, 241, 0.08);
+}
