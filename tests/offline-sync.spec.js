@@ -188,7 +188,7 @@ test.describe('VanTrack v4: Pruebas de Estrés y Offline-First', () => {
     await page.close();
   });
 
-  test('Sincronización de mutaciones offline, persistencia tras recarga y UI optimista', async ({ page, context }) => {
+  test('Sincronización de mutaciones offline, persistencia tras recarga y UI optimista', async ({ page }) => {
     page.on('console', msg => console.log(`[Browser] ${msg.type()}: ${msg.text()}`));
     const userExpenses = [];
     await mockSupabase(page, {
@@ -287,7 +287,7 @@ test.describe('VanTrack v4: Pruebas de Estrés y Offline-First', () => {
     await expect(syncedCard).toHaveCSS('opacity', '1');
   });
 
-  test('Aislamiento de caché multiusuario (Evitar fugas de datos al cambiar de sesión)', async ({ page, context }) => {
+  test('Aislamiento de caché multiusuario (Evitar fugas de datos al cambiar de sesión)', async ({ page }) => {
     page.on('console', msg => console.log(`[Browser] ${msg.type()}: ${msg.text()}`));
     // 1. Iniciar sesión como Conductor A con sus gastos propios
     await mockSupabase(page, {
@@ -345,7 +345,7 @@ test.describe('VanTrack v4: Pruebas de Estrés y Offline-First', () => {
     await expect(page.locator('.expenses-list')).toContainText('Gasto Privado B');
   });
 
-  test('Rollback visual ante fallo definitivo del servidor (RLS/Validación)', async ({ page, context }) => {
+  test('Rollback visual ante fallo definitivo del servidor (RLS/Validación)', async ({ page }) => {
     page.on('console', msg => console.log(`[Browser] ${msg.type()}: ${msg.text()}`));
     await mockSupabase(page, {
       userId: 'user-123',

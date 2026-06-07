@@ -10,8 +10,6 @@ import { registerSW } from 'virtual:pwa-register'
 // Registrar el Service Worker para habilitar el funcionamiento offline de la PWA
 registerSW({ immediate: true })
 
-import { supabase } from './lib/supabase'
-
 // Configurar el QueryClient con opciones por defecto para Offline-First
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,7 +44,7 @@ createRoot(document.getElementById('root')).render(
         persister,
         maxAge: 1000 * 60 * 60 * 24 * 7, // Tiempo máximo de persistencia en disco: 7 días
         dehydrateOptions: {
-          shouldDehydrateMutation: (mutation) => true,
+          shouldDehydrateMutation: () => true,
         },
       }}
     >
