@@ -60,12 +60,58 @@
   border-color: var(--border-default);
 }
 
-.worker-card__header,
 .van-card__header {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
   margin-bottom: var(--space-sm);
+}
+
+.worker-card__main {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.worker-card__name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  margin-bottom: 2px;
+}
+
+.worker-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.worker-card__actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.worker-card__actions .btn {
+  flex: 1;
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  min-height: 36px;
+}
+
+.worker-card__btn-delete {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.worker-card__btn-delete:hover {
+  background: #ef4444;
+  color: white;
 }
 
 .worker-card__avatar {

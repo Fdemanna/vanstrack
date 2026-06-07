@@ -388,59 +388,59 @@ function WorkersTab() {
         <div className="entity-list">
           {workers.map(w => (
             <div key={w.id} className="worker-card">
-              <div className="worker-card__header">
+              <div className="worker-card__main">
                 <div className="worker-card__avatar">
                   {getInitials(w.name)}
                 </div>
                 <div className="worker-card__info">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div className="worker-card__name">{w.name || 'Sin nombre'}</div>
+                  <div className="worker-card__name-row">
+                    <span className="worker-card__name">{w.name || 'Sin nombre'}</span>
+                    <span className={`badge badge--${w.role}`}>
+                      {w.role === 'admin' ? 'Admin' : 'Worker'}
+                    </span>
                   </div>
                   <div className="worker-card__email">
                     {w.username ? `@${w.username}` : `${w.id.slice(0, 8)}…`}
                   </div>
-                  {w.id !== session?.user?.id && (
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                      <button
-                        className="btn btn--secondary"
-                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', minHeight: 'auto' }}
-                        onClick={() => handleOpenResetModal(w)}
-                        title="Restablecer Contraseña"
-                      >
-                        Resetear Clave
-                      </button>
-                      <button
-                        className="btn btn--danger"
-                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', minHeight: 'auto', backgroundColor: '#ef4444', color: 'white', border: 'none' }}
-                        onClick={() => handleDeleteWorker(w)}
-                        title="Eliminar Usuario"
-                      >
-                        Eliminar
-                      </button>
+                  {w.password_changed === false && (
+                    <div style={{ marginTop: '6px' }}>
+                      <span className="badge badge--warning">
+                        Clave Temp.
+                      </span>
                     </div>
                   )}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-                  <span className={`badge badge--${w.role}`}>
-                    {w.role === 'admin' ? 'Admin' : 'Worker'}
-                  </span>
-                  {w.password_changed === false && (
-                    <span className="badge badge--warning">
-                      Clave Temp.
-                    </span>
-                  )}
-                </div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'var(--space-xs)' }}>
-                <div className="worker-card__date">
+
+              <div className="worker-card__meta">
+                <span className="worker-card__date">
                   Creado: {new Date(w.created_at).toLocaleDateString('es-ES')}
-                </div>
+                </span>
                 {w.creator && (
-                  <div className="worker-card__creator">
+                  <span className="worker-card__creator">
                     Creado por: {w.creator.name}
-                  </div>
+                  </span>
                 )}
               </div>
+
+              {w.id !== session?.user?.id && (
+                <div className="worker-card__actions">
+                  <button
+                    className="btn btn--secondary"
+                    onClick={() => handleOpenResetModal(w)}
+                    title="Restablecer Contraseña"
+                  >
+                    Resetear Clave
+                  </button>
+                  <button
+                    className="btn worker-card__btn-delete"
+                    onClick={() => handleDeleteWorker(w)}
+                    title="Eliminar Usuario"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
