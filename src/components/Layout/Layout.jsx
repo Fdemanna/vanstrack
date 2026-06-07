@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './Layout.css';
 
@@ -65,6 +65,7 @@ function getInitials(name) {
 
 export default function Layout() {
   const { profile, isAdmin } = useAuth();
+  const navigate = useNavigate();
   const navItems = getNavItems(isAdmin);
 
   return (
@@ -104,7 +105,7 @@ export default function Layout() {
             <div className="sidebar__avatar">
               {getInitials(profile?.name)}
             </div>
-            <div className="sidebar__user-info">
+            <div className="sidebar__user-info" onClick={() => navigate('/profile')}>
               <div className="sidebar__user-name">
                 {profile?.name || 'Usuario'}
               </div>

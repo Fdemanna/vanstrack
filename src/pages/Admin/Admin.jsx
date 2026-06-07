@@ -308,6 +308,36 @@ function WorkersTab() {
     },
   });
 
+  // Mutación para Eliminar Trabajador
+  const deleteWorkerMutation = useMutation({
+    mutationFn: async (userId) => {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-worker`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ userId }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al eliminar usuario');
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'workers', 'all'] });
+      queryClient.invalidateQueries({ queryKey: ['profiles', 'all'] });
+      setToast('Usuario eliminado correctamente');
+      setTimeout(() => setToast(null), 3000);
+    },
+    onError: (err) => {
+      setToast(`❌ Error: ${err.message}`);
+      setTimeout(() => setToast(null), 5000);
+    },
+  });
+
   function handleCreateWorker(newWorkerData) {
     createWorkerMutation.mutate(newWorkerData);
   }
@@ -327,6 +357,12 @@ function WorkersTab() {
       userId: selectedUserToReset.id,
       password: newTempPassword,
     });
+  }
+
+  function handleDeleteWorker(user) {
+    if (window.confirm(`¿Estás seguro de eliminar permanentemente al usuario ${user.name}? Esta acción no se puede deshacer.`)) {
+      deleteWorkerMutation.mutate(user.id);
+    }
   }
 
   if (loading) {
@@ -359,23 +395,30 @@ function WorkersTab() {
                 <div className="worker-card__info">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <div className="worker-card__name">{w.name || 'Sin nombre'}</div>
-                    {w.id !== session?.user?.id && (
-                      <button
-                        className="btn-reset-pwd"
-                        onClick={() => handleOpenResetModal(w)}
-                        title="Restablecer Contraseña"
-                        aria-label="Restablecer Contraseña"
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                        </svg>
-                      </button>
-                    )}
                   </div>
                   <div className="worker-card__email">
                     {w.username ? `@${w.username}` : `${w.id.slice(0, 8)}…`}
                   </div>
+                  {w.id !== session?.user?.id && (
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                      <button
+                        className="btn btn--secondary"
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', minHeight: 'auto' }}
+                        onClick={() => handleOpenResetModal(w)}
+                        title="Restablecer Contraseña"
+                      >
+                        Resetear Clave
+                      </button>
+                      <button
+                        className="btn btn--danger"
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', minHeight: 'auto', backgroundColor: '#ef4444', color: 'white', border: 'none' }}
+                        onClick={() => handleDeleteWorker(w)}
+                        title="Eliminar Usuario"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
                   <span className={`badge badge--${w.role}`}>

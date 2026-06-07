@@ -189,6 +189,12 @@
 
   .sidebar__user-info {
     overflow: hidden;
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+  }
+
+  .sidebar__user-info:hover {
+    opacity: 0.8;
   }
 
   .sidebar__user-name {
