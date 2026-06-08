@@ -508,7 +508,7 @@ export default function Deliveries() {
         </button>
       </div>
 
-      {!loading && deliveries.length > 0 && (
+      {!loading && deliveries.length > 0 ? (
         <div className="summary-bar">
           <div className="summary-card">
             <div className="summary-card__value summary-card__value--count">
@@ -523,7 +523,7 @@ export default function Deliveries() {
             <div className="summary-card__label">Paquetes</div>
           </div>
         </div>
-      )}
+      ) : null}
 
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-2xl)' }}>
@@ -555,22 +555,22 @@ export default function Deliveries() {
                 className={`delivery-card ${isPending ? 'delivery-card--pending' : ''}`}
                 onClick={() => setSelectedDelivery(delivery)}
               >
-                {isAdmin && workerName && (
+                {isAdmin && workerName ? (
                   <div className="delivery-card__worker">
                     {workerName}
-                    {isPending && Icons.CloudSync}
+                    {isPending ? Icons.CloudSync : null}
                   </div>
-                )}
+                ) : null}
                 <div className="delivery-card__top">
-                  {van && (
+                  {van ? (
                     <div className="delivery-card__van-badge">
                       <span className="delivery-card__van-dot" style={{ backgroundColor: van.color }} />
                       {van.label}
                     </div>
-                  )}
+                  ) : null}
                   <span className="delivery-card__date">
                     {formatDateDisplay(delivery.date)}
-                    {!isAdmin && isPending && Icons.CloudSync}
+                    {!isAdmin && isPending ? Icons.CloudSync : null}
                   </span>
                 </div>
 
@@ -583,15 +583,15 @@ export default function Deliveries() {
                   </div>
                 </div>
 
-                {delivery.notes && (
+                {delivery.notes ? (
                   <div className="delivery-card__notes">"{delivery.notes}"</div>
-                )}
+                ) : null}
                 
-                {isPending && (
+                {isPending ? (
                   <div className="delivery-card__pending-footer">
                     Pendiente de sincronizar
                   </div>
-                )}
+                ) : null}
               </div>
             );
           })}
@@ -599,7 +599,7 @@ export default function Deliveries() {
       )}
 
       {/* Banner informativo para workers con ruta activa hoy */}
-      {!isAdmin && workerAlreadyHasRouteToday && (
+      {!isAdmin && workerAlreadyHasRouteToday ? (
         <div className="card" style={{
           marginBottom: 'var(--space-md)',
           borderLeft: '3px solid var(--color-accent)',
@@ -613,7 +613,7 @@ export default function Deliveries() {
             Ya tienes una <strong>ruta activa hoy</strong>. Solo se permite una furgoneta por conductor por jornada.
           </p>
         </div>
-      )}
+      ) : null}
 
       {/* FAB: bloqueado para workers que ya tienen ruta hoy */}
       {!isAdmin && workerAlreadyHasRouteToday ? (
@@ -626,7 +626,7 @@ export default function Deliveries() {
         </button>
       )}
 
-      {showCreateModal && (
+      {showCreateModal ? (
         <Modal title="Iniciar Ruta" onClose={() => setShowCreateModal(false)}>
           <CreateDeliveryForm
             vans={vans}
@@ -635,22 +635,22 @@ export default function Deliveries() {
             onClose={() => setShowCreateModal(false)}
           />
         </Modal>
-      )}
+      ) : null}
 
-      {selectedDelivery && (
+      {selectedDelivery ? (
         <DeliveryDetailModal
           delivery={selectedDelivery}
           van={vanMap[selectedDelivery.van_id]}
           workerName={profiles[selectedDelivery.user_id]}
           onClose={() => setSelectedDelivery(null)}
         />
-      )}
+      ) : null}
 
-      {toast && (
+      {toast ? (
         <div className={`toast toast--${toast.type || 'success'}`}>
           {toast.message}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

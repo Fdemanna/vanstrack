@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext(null);
@@ -72,14 +72,14 @@ export function AuthProvider({ children }) {
     };
   }
 
-  async function signIn(emailOrUsername, password) {
+  const signIn = useCallback(async (emailOrUsername, password) => {
     const isEmail = emailOrUsername.includes('@');
     const email = isEmail ? emailOrUsername.trim().toLowerCase() : `${emailOrUsername.trim().toLowerCase()}@local.vanstrack`;
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-  }
+  }, []);
 
-  async function signUp(usernameOrEmail, password, name) {
+  const signUp = useCallback(async (usernameOrEmail, password, name) => {
     const isEmail = usernameOrEmail.includes('@');
     const email = isEmail ? usernameOrEmail.trim().toLowerCase() : `${usernameOrEmail.trim().toLowerCase()}@local.vanstrack`;
     const usernameVal = isEmail ? null : usernameOrEmail.trim().toLowerCase();
@@ -115,9 +115,9 @@ export function AuthProvider({ children }) {
       // 3. Recargar el perfil para actualizar el estado del AuthContext en la interfaz
       await fetchProfile(user.id);
     }
-  }
+  }, [fetchProfile]);
 
-  async function signOut() {
+  const signOut = useCallback(async () => {
     const userId = session?.user?.id;
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
@@ -126,9 +126,9 @@ export function AuthProvider({ children }) {
     }
     setSession(null);
     setProfile(null);
-  }
+  }, [session]);
 
-  async function updateProfileName(newName) {
+  const updateProfileName = useCallback(async (newName) => {
     if (!session?.user?.id) throw new Error('No hay sesión activa');
     const { data, error } = await supabase
       .from('profiles')
@@ -142,9 +142,9 @@ export function AuthProvider({ children }) {
     // Sincronizar la caché offline con el nombre actualizado (solo campos mínimos)
     localStorage.setItem(`profile_${session.user.id}`, JSON.stringify(minimalProfileCache(data)));
     return data;
-  }
+  }, [session]);
 
-  async function changePassword(newPassword) {
+  const changePassword = useCallback(async (newPassword) => {
     if (!session?.user?.id) throw new Error('No hay sesión activa');
     
     // 1. Actualizar contraseña en Supabase Auth
@@ -162,9 +162,9 @@ export function AuthProvider({ children }) {
     if (profileError) throw profileError;
     setProfile(data);
     return data;
-  }
+  }, [session]);
 
-  const value = {
+  const value = useMemo(() => ({
     session,
     profile,
     loading,
@@ -174,7 +174,7 @@ export function AuthProvider({ children }) {
     updateProfileName,
     changePassword,
     isAdmin: profile?.role === 'admin',
-  };
+  }), [session, profile, loading, signIn, signUp, signOut, updateProfileName, changePassword]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

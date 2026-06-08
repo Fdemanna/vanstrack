@@ -500,6 +500,100 @@ select.form-input {
   margin-bottom: var(--space-md);
 }
 
+/* ── Shared Layout Components (Date Nav & Summary Bar) ── */
+.date-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+  padding: var(--space-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.date-nav__btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.date-nav__btn:hover {
+  background: var(--bg-surface-2);
+  color: var(--text-primary);
+}
+
+.date-nav__btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.date-nav__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  min-width: 160px;
+  text-align: center;
+  cursor: pointer;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+
+.date-nav__label:hover {
+  background: var(--bg-surface-2);
+}
+
+.date-nav__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.summary-bar {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.summary-card {
+  flex: 1;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-sm) var(--space-md);
+  text-align: center;
+}
+
+.summary-card__value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.summary-card__value--expense {
+  color: var(--color-warning-light);
+}
+
+.summary-card__value--count {
+  color: var(--color-primary-light);
+}
+
+.summary-card__label {
+  font-size: 0.6875rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
 /* ── Toast Notification ── */
 .toast {
   position: fixed;

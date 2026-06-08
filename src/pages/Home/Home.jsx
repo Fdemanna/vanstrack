@@ -43,23 +43,24 @@ export default function Home() {
     queryFn: async () => {
       const todayStr = getTodayStr();
 
-      // ── 1. Gastos de hoy ──
+      // ── Consultas preparadas ──
       let expQuery = supabase.from('expenses').select('amount').eq('date', todayStr);
       if (!isAdmin) {
         expQuery = expQuery.eq('user_id', session.user.id);
       }
-      const { data: expData, error: expError } = await expQuery;
-      if (expError) throw expError;
-      const sumExpenses = expData?.reduce((acc, curr) => acc + Number(curr.amount), 0) || 0;
 
-      // ── 2. Entregas de hoy ──
       let delQuery = supabase.from('deliveries').select('packages').eq('date', todayStr);
       if (!isAdmin) {
         delQuery = delQuery.eq('user_id', session.user.id);
       }
-      const { data: delData, error: delError } = await delQuery;
-      if (delError) throw delError;
-      const sumPackages = delData?.reduce((acc, curr) => acc + Number(curr.packages), 0) || 0;
+
+      // Ejecutar en paralelo (async-parallel)
+      const [expRes, delRes] = await Promise.all([expQuery, delQuery]);
+      if (expRes.error) throw expRes.error;
+      if (delRes.error) throw delRes.error;
+
+      const sumExpenses = expRes.data?.reduce((acc, curr) => acc + Number(curr.amount), 0) || 0;
+      const sumPackages = delRes.data?.reduce((acc, curr) => acc + Number(curr.packages), 0) || 0;
 
       return { expenses: sumExpenses, packages: sumPackages };
     },
@@ -75,26 +76,20 @@ export default function Home() {
     queryFn: async () => {
       const todayStr = getTodayStr();
 
-      // Entregas de hoy de todo el equipo
-      const { data: delData, error: delError } = await supabase
-        .from('deliveries')
-        .select('id, van_id, user_id')
-        .eq('date', todayStr);
-      if (delError) throw delError;
+      // Ejecutar consultas de flota en paralelo (async-parallel)
+      const [delRes, vansRes, profilesRes] = await Promise.all([
+        supabase.from('deliveries').select('id, van_id, user_id').eq('date', todayStr),
+        supabase.from('vans').select('*').eq('is_active', true).order('label'),
+        supabase.from('profiles').select('id, name')
+      ]);
 
-      // Furgonetas activas
-      const { data: vansData, error: vansError } = await supabase
-        .from('vans')
-        .select('*')
-        .eq('is_active', true)
-        .order('label');
-      if (vansError) throw vansError;
+      if (delRes.error) throw delRes.error;
+      if (vansRes.error) throw vansRes.error;
+      if (profilesRes.error) throw profilesRes.error;
 
-      // Perfiles del equipo
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, name');
-      if (profilesError) throw profilesError;
+      const delData = delRes.data;
+      const vansData = vansRes.data;
+      const profilesData = profilesRes.data;
 
       const pMap = {};
       profilesData?.forEach(p => { pMap[p.id] = p.name; });

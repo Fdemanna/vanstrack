@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout/Layout';
+import LoadingScreen from './components/LoadingScreen/LoadingScreen';
 
 // Carga perezosa (Lazy Loading) de páginas para optimizar bundle size
 const Login = lazy(() => import('./pages/Login/Login'));
@@ -16,11 +17,7 @@ function ProtectedRoute({ children }) {
   const { session, profile, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="loading-screen">
-        <div className="spinner" />
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!session) {
@@ -38,11 +35,7 @@ function ForcePasswordProtectedRoute({ children }) {
   const { session, profile, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="loading-screen">
-        <div className="spinner" />
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!session) {
@@ -60,11 +53,7 @@ function PublicRoute({ children }) {
   const { session, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="loading-screen">
-        <div className="spinner" />
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (session) {
@@ -78,11 +67,7 @@ function AdminRoute({ children }) {
   const { isAdmin, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="loading-screen">
-        <div className="spinner" />
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!isAdmin) {
@@ -96,13 +81,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Suspense
-          fallback={
-            <div className="loading-screen">
-              <div className="spinner" />
-            </div>
-          }
-        >
+        <Suspense fallback={<LoadingScreen />}>
           <Routes>
             {/* Public */}
             <Route

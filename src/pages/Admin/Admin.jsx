@@ -158,16 +158,18 @@ function CreateWorkerForm({ onSubmit, onClose, loading, error }) {
 }
 
 // ─────────────────────────────────────────────
-// Create Van Form
+// Van Form (Create/Edit)
 // ─────────────────────────────────────────────
-function CreateVanForm({ onSubmit, onClose, loading, error }) {
-  const [label, setLabel] = useState('');
-  const [color, setColor] = useState('#6366f1');
+function VanForm({ initialData, onSubmit, onClose, loading, error }) {
+  const [label, setLabel] = useState(initialData?.label || '');
+  const [color, setColor] = useState(initialData?.color || '#6366f1');
 
   function handleSubmit(e) {
     e.preventDefault();
     onSubmit({ label, color });
   }
+
+  const isEdit = !!initialData;
 
   return (
     <form onSubmit={handleSubmit}>
@@ -206,6 +208,8 @@ function CreateVanForm({ onSubmit, onClose, loading, error }) {
         <button type="submit" className="btn btn--primary" disabled={loading}>
           {loading ? (
             <><span className="spinner spinner--sm" /> Guardando...</>
+          ) : isEdit ? (
+            'Guardar Cambios'
           ) : (
             'Crear Furgoneta'
           )}
@@ -222,6 +226,7 @@ function WorkersTab() {
   const { session } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [toast, setToast] = useState(null);
+  const [confirmDialog, setConfirmDialog] = useState(null);
 
   // Password Reset States
   const [selectedUserToReset, setSelectedUserToReset] = useState(null);
@@ -360,14 +365,19 @@ function WorkersTab() {
   }
 
   function handleDeleteWorker(user) {
-    if (window.confirm(`¿Estás seguro de eliminar permanentemente al usuario ${user.name}? Esta acción no se puede deshacer.`)) {
-      deleteWorkerMutation.mutate(user.id);
-    }
+    setConfirmDialog({
+      title: "Eliminar Usuario",
+      message: `¿Estás seguro de eliminar permanentemente al usuario ${user.name}? Esta acción no se puede deshacer.`,
+      onConfirm: () => {
+        deleteWorkerMutation.mutate(user.id);
+        setConfirmDialog(null);
+      }
+    });
   }
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-2xl)' }}>
+      <div className="loading-screen" style={{ minHeight: 'auto', padding: 'var(--space-2xl)' }}>
         <div className="spinner" />
       </div>
     );
@@ -468,7 +478,7 @@ function WorkersTab() {
               <div className="error-banner">{resetPasswordMutation.error.message}</div>
             )}
             
-            <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: 'var(--space-md)', lineHeight: '1.4' }}>
+            <p className="modal__text modal__text--sm">
               Ingresa una nueva contraseña temporal. Se forzará al usuario a cambiarla en su próximo inicio de sesión.
             </p>
 
@@ -491,7 +501,7 @@ function WorkersTab() {
               <button type="button" className="btn btn--secondary" onClick={handleCloseResetModal} disabled={resetPasswordMutation.isPending}>
                 Cancelar
               </button>
-              <button type="submit" className="btn btn--primary btn--danger" disabled={resetPasswordMutation.isPending}>
+              <button type="submit" className="btn btn--danger" disabled={resetPasswordMutation.isPending}>
                 {resetPasswordMutation.isPending ? (
                   <><span className="spinner spinner--sm" /> Guardando...</>
                 ) : (
@@ -500,6 +510,22 @@ function WorkersTab() {
               </button>
             </div>
           </form>
+        </Modal>
+      )}
+
+      {confirmDialog && (
+        <Modal title={confirmDialog.title} onClose={() => setConfirmDialog(null)}>
+          <p className="modal__text">
+            {confirmDialog.message}
+          </p>
+          <div className="modal__actions">
+            <button className="btn btn--secondary" onClick={() => setConfirmDialog(null)}>
+              Cancelar
+            </button>
+            <button className="btn btn--danger" onClick={confirmDialog.onConfirm}>
+              Eliminar
+            </button>
+          </div>
         </Modal>
       )}
 
@@ -514,7 +540,9 @@ function WorkersTab() {
 function VansTab() {
   const { session } = useAuth();
   const [showModal, setShowModal] = useState(false);
+  const [editingVan, setEditingVan] = useState(null);
   const [toast, setToast] = useState(null);
+  const [confirmDialog, setConfirmDialog] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -549,6 +577,53 @@ function VansTab() {
       setToast('Furgoneta creada correctamente');
       setTimeout(() => setToast(null), 3000);
       setShowModal(false);
+    },
+  });
+
+  // Mutación para Editar Furgoneta
+  const updateVanMutation = useMutation({
+    mutationFn: async (updatedVan) => {
+      const { data, error } = await supabase
+        .from('vans')
+        .update({ label: updatedVan.label, color: updatedVan.color })
+        .eq('id', updatedVan.id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'vans', 'all'] });
+      queryClient.invalidateQueries({ queryKey: ['vans', 'active'] });
+      setToast('Furgoneta actualizada correctamente');
+      setTimeout(() => setToast(null), 3000);
+      setShowModal(false);
+    },
+  });
+
+  // Mutación para Eliminar Furgoneta
+  const deleteVanMutation = useMutation({
+    mutationFn: async (vanId) => {
+      const { error } = await supabase
+        .from('vans')
+        .delete()
+        .eq('id', vanId);
+      if (error) throw error;
+      return vanId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'vans', 'all'] });
+      queryClient.invalidateQueries({ queryKey: ['vans', 'active'] });
+      setToast('Furgoneta eliminada correctamente');
+      setTimeout(() => setToast(null), 3000);
+    },
+    onError: (err) => {
+      if (err.code === '23503' || err.message?.includes('foreign key') || err.message?.includes('Conflict')) {
+        setToast('❌ No se puede eliminar porque tiene entregas registradas en el historial. Te sugerimos "Desactivarla".');
+      } else {
+        setToast(`❌ Error: ${err.message}`);
+      }
+      setTimeout(() => setToast(null), 5000);
     },
   });
 
@@ -587,24 +662,55 @@ function VansTab() {
     },
   });
 
-  function handleCreateVan(newVanData) {
-    createVanMutation.mutate(newVanData);
+  function handleOpenCreate() {
+    setEditingVan(null);
+    setShowModal(true);
+  }
+
+  function handleOpenEdit(van) {
+    setEditingVan(van);
+    setShowModal(true);
+  }
+
+  function handleSubmitVan(vanData) {
+    if (editingVan) {
+      updateVanMutation.mutate({ id: editingVan.id, ...vanData });
+    } else {
+      createVanMutation.mutate(vanData);
+    }
+  }
+
+  function handleDeleteVan(van) {
+    const msg = `¿Estás seguro de eliminar permanentemente la furgoneta "${van.label}"?\n\n⚠️ IMPORTANTE: Si esta furgoneta ya ha hecho entregas, la base de datos bloqueará su eliminación para no perder el historial.\n\nEn ese caso, te recomendamos usar el interruptor (switch) para "Desactivarla" en lugar de eliminarla.`;
+    setConfirmDialog({
+      title: "Eliminar Furgoneta",
+      message: msg,
+      onConfirm: () => {
+        deleteVanMutation.mutate(van.id);
+        setConfirmDialog(null);
+      }
+    });
   }
 
   function handleToggleVanActive(van) {
     // B-4: pedir confirmación antes de desactivar para evitar quitar una van en uso
     if (van.is_active) {
-      const ok = window.confirm(
-        `¿Desactivar "${van.label}"?\nSi hay un conductor usándola hoy, desaparecerá del selector de entregas.`
-      );
-      if (!ok) return;
+      setConfirmDialog({
+        title: "Desactivar Furgoneta",
+        message: `¿Desactivar "${van.label}"?\nSi hay un conductor usándola hoy, desaparecerá del selector de entregas.`,
+        onConfirm: () => {
+          toggleVanActiveMutation.mutate(van);
+          setConfirmDialog(null);
+        }
+      });
+      return;
     }
     toggleVanActiveMutation.mutate(van);
   }
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-2xl)' }}>
+      <div className="loading-screen" style={{ minHeight: 'auto', padding: 'var(--space-2xl)' }}>
         <div className="spinner" />
       </div>
     );
@@ -633,13 +739,27 @@ function VansTab() {
                   style={{ backgroundColor: v.color }}
                 />
                 <span className="van-card__label">{v.label}</span>
-                <button
-                  className="btn btn--ghost btn--sm"
-                  onClick={() => handleToggleVanActive(v)}
-                >
+                <div className="switch-wrapper" onClick={() => handleToggleVanActive(v)}>
+                  <div className={`switch ${v.is_active ? 'switch--active' : ''}`}>
+                    <div className="switch__handle" />
+                  </div>
                   <span className={`van-card__status van-card__status--${v.is_active ? 'active' : 'inactive'}`}>
                     {v.is_active ? 'Activa' : 'Inactiva'}
                   </span>
+                </div>
+              </div>
+              <div className="worker-card__actions" style={{ marginTop: 'var(--space-sm)' }}>
+                <button
+                  className="btn btn--secondary"
+                  onClick={() => handleOpenEdit(v)}
+                >
+                  Editar
+                </button>
+                <button
+                  className="btn worker-card__btn-delete"
+                  onClick={() => handleDeleteVan(v)}
+                >
+                  Eliminar
                 </button>
               </div>
             </div>
@@ -647,18 +767,35 @@ function VansTab() {
         </div>
       )}
 
-      <button className="fab" onClick={() => setShowModal(true)} aria-label="Añadir furgoneta">
+      <button className="fab" onClick={handleOpenCreate} aria-label="Añadir furgoneta">
         {PlusIcon}
       </button>
 
       {showModal && (
-        <Modal title="Nueva Furgoneta" onClose={() => setShowModal(false)}>
-          <CreateVanForm
-            onSubmit={handleCreateVan}
+        <Modal title={editingVan ? "Editar Furgoneta" : "Nueva Furgoneta"} onClose={() => setShowModal(false)}>
+          <VanForm
+            initialData={editingVan}
+            onSubmit={handleSubmitVan}
             onClose={() => setShowModal(false)}
-            loading={createVanMutation.isPending}
-            error={createVanMutation.error?.message}
+            loading={createVanMutation.isPending || updateVanMutation.isPending}
+            error={createVanMutation.error?.message || updateVanMutation.error?.message}
           />
+        </Modal>
+      )}
+
+      {confirmDialog && (
+        <Modal title={confirmDialog.title} onClose={() => setConfirmDialog(null)}>
+          <p className="modal__text">
+            {confirmDialog.message}
+          </p>
+          <div className="modal__actions">
+            <button className="btn btn--secondary" onClick={() => setConfirmDialog(null)}>
+              Cancelar
+            </button>
+            <button className="btn btn--danger" onClick={confirmDialog.onConfirm}>
+              Confirmar
+            </button>
+          </div>
         </Modal>
       )}
 
