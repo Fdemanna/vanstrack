@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Modal from '../../components/Modal/Modal';
 import './Admin.css';
 
 /* ── SVG Icons ── */
@@ -42,32 +43,7 @@ function getInitials(name) {
   return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 }
 
-// ─────────────────────────────────────────────
-// Modal component (bottom sheet style)
-// ─────────────────────────────────────────────
-function Modal({ title, onClose, children }) {
-  useEffect(() => {
-    function handleKey(e) {
-      if (e.key === 'Escape') onClose();
-    }
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [onClose]);
 
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div className="modal__header">
-          <h2 className="modal__title">{title}</h2>
-          <button className="modal__close" onClick={onClose} aria-label="Cerrar">
-            {CloseIcon}
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
 
 // ─────────────────────────────────────────────
 // Create Worker Form
@@ -85,7 +61,7 @@ function CreateWorkerForm({ onSubmit, onClose, loading, error }) {
 
   return (
     <form onSubmit={handleSubmit}>
-      {error && <div className="error-banner">{error}</div>}
+      {error ? <div className="error-banner">{error}</div> : null}
 
       <div className="form-group">
         <label className="form-label" htmlFor="worker-name">Nombre completo</label>
@@ -173,7 +149,7 @@ function VanForm({ initialData, onSubmit, onClose, loading, error }) {
 
   return (
     <form onSubmit={handleSubmit}>
-      {error && <div className="error-banner">{error}</div>}
+      {error ? <div className="error-banner">{error}</div> : null}
 
       <div className="form-group">
         <label className="form-label" htmlFor="van-label">Nombre / Matrícula</label>
@@ -412,13 +388,13 @@ function WorkersTab() {
                   <div className="worker-card__email">
                     {w.username ? `@${w.username}` : `${w.id.slice(0, 8)}…`}
                   </div>
-                  {w.password_changed === false && (
+                  {w.password_changed === false ? (
                     <div style={{ marginTop: '6px' }}>
                       <span className="badge badge--warning">
                         Clave Temp.
                       </span>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
 
@@ -426,14 +402,14 @@ function WorkersTab() {
                 <span className="worker-card__date">
                   Creado: {new Date(w.created_at).toLocaleDateString('es-ES')}
                 </span>
-                {w.creator && (
+                {w.creator ? (
                   <span className="worker-card__creator">
                     Creado por: {w.creator.name}
                   </span>
-                )}
+                ) : null}
               </div>
 
-              {w.id !== session?.user?.id && (
+              {w.id !== session?.user?.id ? (
                 <div className="worker-card__actions">
                   <button
                     className="btn btn--secondary"
@@ -450,7 +426,7 @@ function WorkersTab() {
                     Eliminar
                   </button>
                 </div>
-              )}
+              ) : null}
             </div>
           ))}
         </div>
@@ -460,7 +436,7 @@ function WorkersTab() {
         {PlusIcon}
       </button>
 
-      {showModal && (
+      {showModal ? (
         <Modal title="Nuevo Usuario" onClose={() => setShowModal(false)}>
           <CreateWorkerForm
             onSubmit={handleCreateWorker}
@@ -469,14 +445,14 @@ function WorkersTab() {
             error={createWorkerMutation.error?.message}
           />
         </Modal>
-      )}
+      ) : null}
 
-      {selectedUserToReset && (
+      {selectedUserToReset ? (
         <Modal title={`Nueva Contraseña — ${selectedUserToReset.name}`} onClose={handleCloseResetModal}>
           <form onSubmit={handleResetPasswordSubmit}>
-            {resetPasswordMutation.error && (
+            {resetPasswordMutation.error ? (
               <div className="error-banner">{resetPasswordMutation.error.message}</div>
-            )}
+            ) : null}
             
             <p className="modal__text modal__text--sm">
               Ingresa una nueva contraseña temporal. Se forzará al usuario a cambiarla en su próximo inicio de sesión.
@@ -511,9 +487,9 @@ function WorkersTab() {
             </div>
           </form>
         </Modal>
-      )}
+      ) : null}
 
-      {confirmDialog && (
+      {confirmDialog ? (
         <Modal title={confirmDialog.title} onClose={() => setConfirmDialog(null)}>
           <p className="modal__text">
             {confirmDialog.message}
@@ -527,9 +503,9 @@ function WorkersTab() {
             </button>
           </div>
         </Modal>
-      )}
+      ) : null}
 
-      {toast && <div className="toast toast--success">{toast}</div>}
+      {toast ? <div className="toast toast--success">{toast}</div> : null}
     </>
   );
 }
@@ -771,7 +747,7 @@ function VansTab() {
         {PlusIcon}
       </button>
 
-      {showModal && (
+      {showModal ? (
         <Modal title={editingVan ? "Editar Furgoneta" : "Nueva Furgoneta"} onClose={() => setShowModal(false)}>
           <VanForm
             initialData={editingVan}
@@ -781,9 +757,9 @@ function VansTab() {
             error={createVanMutation.error?.message || updateVanMutation.error?.message}
           />
         </Modal>
-      )}
+      ) : null}
 
-      {confirmDialog && (
+      {confirmDialog ? (
         <Modal title={confirmDialog.title} onClose={() => setConfirmDialog(null)}>
           <p className="modal__text">
             {confirmDialog.message}
@@ -797,9 +773,9 @@ function VansTab() {
             </button>
           </div>
         </Modal>
-      )}
+      ) : null}
 
-      {toast && <div className="toast toast--success">{toast}</div>}
+      {toast ? <div className="toast toast--success">{toast}</div> : null}
     </>
   );
 }
@@ -834,8 +810,8 @@ export default function Admin() {
         </button>
       </div>
 
-      {tab === 'workers' && <WorkersTab />}
-      {tab === 'vans' && <VansTab />}
+      {tab === 'workers' ? <WorkersTab /> : null}
+      {tab === 'vans' ? <VansTab /> : null}
     </div>
   );
 }

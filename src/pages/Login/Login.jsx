@@ -31,12 +31,7 @@ export default function Login() {
       <div className="login__card">
         <div className="login__logo">
           <div className="login__logo-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="1" y="3" width="15" height="13" rx="2" ry="2" />
-              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-              <circle cx="5.5" cy="18.5" r="2.5" />
-              <circle cx="18.5" cy="18.5" r="2.5" />
-            </svg>
+            <img src="/logo.svg" alt="VanTrack" />
           </div>
           <span className="login__brand">VanTrack</span>
         </div>

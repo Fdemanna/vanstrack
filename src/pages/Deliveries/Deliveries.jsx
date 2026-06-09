@@ -1,36 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Modal from '../../components/Modal/Modal';
+import { formatDate, formatDateDisplay, formatGroupDate, formatMonth, getMonthRange } from '../../utils/dateUtils';
 import './Deliveries.css';
 
-/* ── Helpers ── */
-function formatDate(date) {
-  // Usar fecha LOCAL para evitar desfase de zona horaria (UTC vs local)
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
 
-function formatDateDisplay(dateStr) {
-  const d = new Date(dateStr + 'T12:00:00');
-  return d.toLocaleDateString('es-ES', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  });
-}
-
-function formatMonth(date) {
-  return date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-}
-
-function getMonthRange(date) {
-  const start = new Date(date.getFullYear(), date.getMonth(), 1);
-  const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-  return { start: formatDate(start), end: formatDate(end) };
-}
 
 /* ── SVG Icons ── */
 const Icons = {
@@ -78,28 +54,7 @@ const Icons = {
   ),
 };
 
-/* ── Modal ── */
-function Modal({ title, onClose, children }) {
-  useEffect(() => {
-    const handleKey = (e) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [onClose]);
 
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div className="modal__header">
-          <h2 className="modal__title">{title}</h2>
-          <button className="modal__close" onClick={onClose} aria-label="Cerrar">
-            {Icons.Close}
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
 
 /* ── Create Delivery Form ── */
 function CreateDeliveryForm({ vans, takenVanIds = new Set(), onSubmit, onClose }) {
@@ -337,8 +292,11 @@ export default function Deliveries() {
     refetchInterval: 30_000,
   });
 
-  const vanMap = {};
-  vans.forEach(v => { vanMap[v.id] = v; });
+  const vanMap = useMemo(() => {
+    const map = {};
+    vans.forEach(v => { map[v.id] = v; });
+    return map;
+  }, [vans]);
 
   // Fetch de Perfiles (Solo para administradores)
   const { data: profiles = {} } = useQuery({
@@ -485,7 +443,9 @@ export default function Deliveries() {
     createDeliveryMutation.mutate(newDeliveryData);
   }
 
-  const totalPackages = deliveries.reduce((sum, d) => sum + Number(d.packages), 0);
+  const totalPackages = useMemo(() => {
+    return deliveries.reduce((sum, d) => sum + Number(d.packages), 0);
+  }, [deliveries]);
 
   return (
     <div className="page">
@@ -544,57 +504,76 @@ export default function Deliveries() {
         </div>
       ) : (
         <div className="deliveries-list">
-          {deliveries.map(delivery => {
-            const van = vanMap[delivery.van_id];
-            const workerName = profiles[delivery.user_id];
-            const isPending = delivery.syncPending === true;
+          {(() => {
+            let currentDate = null;
+            return deliveries.map((delivery, index) => {
+              const van = vanMap[delivery.van_id];
+              const workerName = profiles[delivery.user_id];
+              const isPending = delivery.syncPending === true;
+              
+              const isNewDate = currentDate !== delivery.date;
+              if (isNewDate) {
+                currentDate = delivery.date;
+              }
 
-            return (
-              <div 
-                key={delivery.id} 
-                className={`delivery-card ${isPending ? 'delivery-card--pending' : ''}`}
-                onClick={() => setSelectedDelivery(delivery)}
-              >
-                {isAdmin && workerName ? (
-                  <div className="delivery-card__worker">
-                    {workerName}
-                    {isPending ? Icons.CloudSync : null}
-                  </div>
-                ) : null}
-                <div className="delivery-card__top">
-                  {van ? (
-                    <div className="delivery-card__van-badge">
-                      <span className="delivery-card__van-dot" style={{ backgroundColor: van.color }} />
-                      {van.label}
+              const staggerClass = `stagger-${(index % 5) + 1}`;
+
+              return (
+                <div key={delivery.id} className={`delivery-list-item-wrapper ${staggerClass}`}>
+                  {isNewDate ? (
+                    <div className="date-separator">
+                      <span className="date-separator__text">{formatGroupDate(delivery.date)}</span>
+                      <div className="date-separator__line"></div>
                     </div>
                   ) : null}
-                  <span className="delivery-card__date">
-                    {formatDateDisplay(delivery.date)}
-                    {!isAdmin && isPending ? Icons.CloudSync : null}
-                  </span>
-                </div>
+                  <div 
+                    className={`delivery-card ${isPending ? 'delivery-card--pending' : ''}`}
+                    onClick={() => setSelectedDelivery(delivery)}
+                  >
+                    {isAdmin && workerName ? (
+                      <div className="delivery-card__worker">
+                        {workerName}
+                        {isPending ? Icons.CloudSync : null}
+                      </div>
+                    ) : null}
+                    <div className="delivery-card__top">
+                      {van ? (
+                        <div className="delivery-card__van-badge">
+                          <span className="delivery-card__van-dot" style={{ backgroundColor: van.color }} />
+                          {van.label}
+                        </div>
+                      ) : null}
+                      {/* Hide date here if we have it in the group header, or keep it. Let's keep a simpler time/date format if needed, but since it's already grouped, we can just remove it or keep the short date. I will remove the date since it's redundant. */}
+                      {!isAdmin && isPending ? (
+                        <span className="delivery-card__date" style={{ marginLeft: 'auto' }}>
+                          {Icons.CloudSync}
+                        </span>
+                      ) : null}
+                    </div>
 
-                <div className="delivery-card__stats">
-                  <div className="delivery-card__stat">
-                    {Icons.Package} <strong>{delivery.packages}</strong> <span style={{ fontSize: '0.6875rem' }}>paq</span>
-                  </div>
-                  <div className="delivery-card__stat">
-                    {Icons.Route} <strong>{delivery.kilometers}</strong> <span style={{ fontSize: '0.6875rem' }}>km</span>
+                    <div className="delivery-card__stats">
+                      <div className="delivery-card__stat">
+                        {Icons.Package} <strong>{delivery.packages}</strong> <span style={{ fontSize: '0.6875rem' }}>paq</span>
+                      </div>
+                      <div className="delivery-card__stat">
+                        {Icons.Route} <strong>{delivery.kilometers}</strong> <span style={{ fontSize: '0.6875rem' }}>km</span>
+                      </div>
+                    </div>
+
+                    {delivery.notes ? (
+                      <div className="delivery-card__notes">"{delivery.notes}"</div>
+                    ) : null}
+                    
+                    {isPending ? (
+                      <div className="delivery-card__pending-footer">
+                        Pendiente de sincronizar
+                      </div>
+                    ) : null}
                   </div>
                 </div>
-
-                {delivery.notes ? (
-                  <div className="delivery-card__notes">"{delivery.notes}"</div>
-                ) : null}
-                
-                {isPending ? (
-                  <div className="delivery-card__pending-footer">
-                    Pendiente de sincronizar
-                  </div>
-                ) : null}
-              </div>
-            );
-          })}
+              );
+            });
+          })()}
         </div>
       )}
 

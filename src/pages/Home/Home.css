@@ -10,20 +10,37 @@
 }
 
 .dashboard-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: var(--space-md);
+  position: relative;
+  background: rgba(26, 26, 38, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 100px;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  min-height: 120px;
+  overflow: hidden;
+  transition: all var(--transition-base);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+.dashboard-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.03), transparent 70%);
+  pointer-events: none;
 }
 
 .dashboard-card:hover {
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-sm);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(99, 102, 241, 0.1);
+  transform: translateY(-2px);
 }
 
 .dashboard-card--full {
@@ -34,8 +51,20 @@
 .dashboard-card__header {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
   color: var(--text-secondary);
+  z-index: 1;
+}
+
+.dashboard-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface-2);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
 }
 
 .dashboard-card__icon svg {
@@ -45,19 +74,26 @@
 }
 
 .dashboard-card__title {
+  font-family: var(--font-body);
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary);
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
 }
 
 .dashboard-card__value {
-  font-size: 1.5rem;
+  font-family: var(--font-display);
+  font-size: 2rem;
   font-weight: 800;
   color: var(--text-primary);
-  margin-top: var(--space-xs);
+  margin-top: var(--space-md);
   letter-spacing: -0.02em;
+  z-index: 1;
+  background: linear-gradient(to bottom right, #ffffff, #a5b4fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Active Fleet / Assignments */

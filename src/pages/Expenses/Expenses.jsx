@@ -1,36 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Modal from '../../components/Modal/Modal';
+import { formatDate, formatDateDisplay, formatGroupDate, formatMonth, getMonthRange } from '../../utils/dateUtils';
 import './Expenses.css';
 
-/* ── Helpers ── */
-function formatDate(date) {
-  // Usar fecha LOCAL para evitar desfase de zona horaria (B-3)
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
 
-function formatDateDisplay(dateStr) {
-  const d = new Date(dateStr + 'T12:00:00');
-  return d.toLocaleDateString('es-ES', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  });
-}
-
-function formatMonth(date) {
-  return date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-}
-
-function getMonthRange(date) {
-  const start = new Date(date.getFullYear(), date.getMonth(), 1);
-  const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-  return { start: formatDate(start), end: formatDate(end) };
-}
 
 /* ── SVG Icons ── */
 const ChevronLeft = (
@@ -62,28 +38,7 @@ const CloudSyncIcon = (
   </svg>
 );
 
-/* ── Modal ── */
-function Modal({ title, onClose, children }) {
-  useEffect(() => {
-    const handleKey = (e) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [onClose]);
 
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div className="modal__header">
-          <h2 className="modal__title">{title}</h2>
-          <button className="modal__close" onClick={onClose} aria-label="Cerrar">
-            {CloseIcon}
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
 
 /* ── Create Expense Form ── */
 function CreateExpenseForm({ vans, myActiveVanId, onSubmit, onClose }) {
@@ -149,9 +104,9 @@ function CreateExpenseForm({ vans, myActiveVanId, onSubmit, onClose }) {
             <option key={v.id} value={v.id}>{v.label}</option>
           ))}
         </select>
-        {myActiveVanId && vanId === myActiveVanId && (
+        {myActiveVanId && vanId === myActiveVanId ? (
           <p className="form-hint">🟢 Furgoneta activa de tu ruta de hoy</p>
-        )}
+        ) : null}
       </div>
 
       <div className="form-group">
@@ -235,8 +190,11 @@ export default function Expenses() {
     staleTime: 60_000,
   });
 
-  const vanMap = {};
-  vans.forEach(v => { vanMap[v.id] = v; });
+  const vanMap = useMemo(() => {
+    const map = {};
+    vans.forEach(v => { map[v.id] = v; });
+    return map;
+  }, [vans]);
 
   // Fetch de Gastos con Clave asociada al Rol/ID de Usuario
   const { data: expenses = [], isLoading: loading } = useQuery({
@@ -351,7 +309,9 @@ export default function Expenses() {
     createExpenseMutation.mutate(newExpenseData);
   }
 
-  const totalAmount = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+  const totalAmount = useMemo(() => {
+    return expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+  }, [expenses]);
 
   return (
     <div className="page">
@@ -376,7 +336,7 @@ export default function Expenses() {
       </div>
 
       {/* Summary */}
-      {!loading && expenses.length > 0 && (
+      {!loading && expenses.length > 0 ? (
         <div className="summary-bar">
           <div className="summary-card">
             <div className="summary-card__value summary-card__value--expense">
@@ -391,7 +351,7 @@ export default function Expenses() {
             <div className="summary-card__label">Registros</div>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* List */}
       {loading ? (
@@ -411,58 +371,67 @@ export default function Expenses() {
         </div>
       ) : (
         <div className="expenses-list">
-          {expenses.map(expense => {
-            const van = vanMap[expense.van_id];
-            const isPending = expense.syncPending === true;
-            const workerName = isAdmin ? profilesMap[expense.user_id] : null;
-            return (
-              <div 
-                key={expense.id} 
-                className={`expense-card ${isPending ? 'expense-card--pending' : ''}`}
-              >
-                {workerName && (
-                  <div className="expense-card__worker">
-                    {workerName}
-                    {isPending && CloudSyncIcon}
+          {(() => {
+            let currentDate = null;
+            return expenses.map((expense, index) => {
+              const van = vanMap[expense.van_id];
+              const isPending = expense.syncPending === true;
+              const workerName = isAdmin ? profilesMap[expense.user_id] : null;
+
+              const isNewDate = currentDate !== expense.date;
+              if (isNewDate) {
+                currentDate = expense.date;
+              }
+
+              const staggerClass = `stagger-${(index % 5) + 1}`;
+
+              return (
+                <div key={expense.id} className={`expense-list-item-wrapper ${staggerClass}`}>
+                  {isNewDate ? (
+                    <div className="date-separator">
+                      <span className="date-separator__text">{formatGroupDate(expense.date)}</span>
+                      <div className="date-separator__line"></div>
+                    </div>
+                  ) : null}
+                  <div 
+                    className={`expense-card ${isPending ? 'expense-card--pending' : ''}`}
+                  >
+                    {workerName ? (
+                      <div className="expense-card__worker">
+                        {workerName}
+                        {isPending ? CloudSyncIcon : null}
+                      </div>
+                    ) : null}
+                    <div className="expense-card__top">
+                      <span className="expense-card__concept">
+                        {expense.concept}
+                        {isPending ? CloudSyncIcon : null}
+                      </span>
+                      <span className="expense-card__amount">
+                        {Number(expense.amount).toFixed(2)} €
+                      </span>
+                    </div>
+                    <div className="expense-card__meta">
+                      {van ? (
+                        <span className="expense-card__meta-item">
+                          <span
+                            className="expense-card__van-dot"
+                            style={{ backgroundColor: van.color }}
+                          />
+                          {van.label}
+                        </span>
+                      ) : null}
+                      {isPending ? (
+                        <span className="expense-card__pending-text">
+                          Pendiente de sincronizar
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
-                )}
-                <div className="expense-card__top">
-                  <span className="expense-card__concept">
-                    {expense.concept}
-                    {isPending && CloudSyncIcon}
-                  </span>
-                  <span className="expense-card__amount">
-                    {Number(expense.amount).toFixed(2)} €
-                  </span>
                 </div>
-                <div className="expense-card__meta">
-                  <span className="expense-card__meta-item">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                      <line x1="16" y1="2" x2="16" y2="6" />
-                      <line x1="8" y1="2" x2="8" y2="6" />
-                      <line x1="3" y1="10" x2="21" y2="10" />
-                    </svg>
-                    {formatDateDisplay(expense.date)}
-                  </span>
-                  {van && (
-                    <span className="expense-card__meta-item">
-                      <span
-                        className="expense-card__van-dot"
-                        style={{ backgroundColor: van.color }}
-                      />
-                      {van.label}
-                    </span>
-                  )}
-                  {isPending && (
-                    <span className="expense-card__pending-text">
-                      Pendiente de sincronizar
-                    </span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+              );
+            });
+          })()}
         </div>
       )}
 
@@ -472,7 +441,7 @@ export default function Expenses() {
       </button>
 
       {/* Create Modal */}
-      {showModal && (
+      {showModal ? (
         <Modal title="Nuevo Gasto" onClose={() => setShowModal(false)}>
           <CreateExpenseForm
             vans={vans}
@@ -481,14 +450,14 @@ export default function Expenses() {
             onClose={() => setShowModal(false)}
           />
         </Modal>
-      )}
+      ) : null}
 
       {/* Toast */}
-      {toast && (
+      {toast ? (
         <div className={`toast toast--${toast.type || 'success'}`}>
           {toast.message}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
