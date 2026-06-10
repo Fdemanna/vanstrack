@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './Login.css';
 
@@ -92,6 +93,8 @@ export default function Login() {
         </form>
 
         <p className="login__footer">
+          ¿No tienes cuenta? <Link to="/register" style={{ color: 'var(--color-primary-light)', textDecoration: 'underline' }}>Registra tu empresa</Link>
+          <br /><br />
           v4.0 — VanTrack Delivery System
         </p>
       </div>

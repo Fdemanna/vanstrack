@@ -212,7 +212,7 @@ function WorkersTab() {
 
   // Query para cargar trabajadores
   const { data: workers = [], isLoading: loading } = useQuery({
-    queryKey: ['admin', 'workers', 'all'],
+    queryKey: ['admin', 'workers', 'all', session?.user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
@@ -250,7 +250,7 @@ function WorkersTab() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'workers', 'all'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'workers', 'all', session?.user?.id] });
       queryClient.invalidateQueries({ queryKey: ['profiles', 'all'] });
       setToast('Usuario creado correctamente');
       setTimeout(() => setToast(null), 3000);
@@ -282,7 +282,7 @@ function WorkersTab() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'workers', 'all'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'workers', 'all', session?.user?.id] });
       setToast('Contraseña restablecida correctamente');
       setTimeout(() => setToast(null), 3000);
       handleCloseResetModal();
@@ -308,7 +308,7 @@ function WorkersTab() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'workers', 'all'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'workers', 'all', session?.user?.id] });
       queryClient.invalidateQueries({ queryKey: ['profiles', 'all'] });
       setToast('Usuario eliminado correctamente');
       setTimeout(() => setToast(null), 3000);
@@ -524,7 +524,7 @@ function VansTab() {
 
   // Query para cargar furgonetas
   const { data: vans = [], isLoading: loading } = useQuery({
-    queryKey: ['admin', 'vans', 'all'],
+    queryKey: ['admin', 'vans', 'all', session?.user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('vans')
@@ -548,7 +548,7 @@ function VansTab() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'vans', 'all'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'vans', 'all', session?.user?.id] });
       queryClient.invalidateQueries({ queryKey: ['vans', 'active'] });
       setToast('Furgoneta creada correctamente');
       setTimeout(() => setToast(null), 3000);
@@ -614,12 +614,12 @@ function VansTab() {
       return van;
     },
     onMutate: async (van) => {
-      await queryClient.cancelQueries({ queryKey: ['admin', 'vans', 'all'] });
-      const previousVans = queryClient.getQueryData(['admin', 'vans', 'all']) || [];
+      await queryClient.cancelQueries({ queryKey: ['admin', 'vans', 'all', session?.user?.id] });
+      const previousVans = queryClient.getQueryData(['admin', 'vans', 'all', session?.user?.id]) || [];
 
       // Actualizar optimistamente la furgoneta
       queryClient.setQueryData(
-        ['admin', 'vans', 'all'],
+        ['admin', 'vans', 'all', session?.user?.id],
         previousVans.map(v => v.id === van.id ? { ...v, is_active: !v.is_active } : v)
       );
 
@@ -627,13 +627,13 @@ function VansTab() {
     },
     onError: (err, van, context) => {
       if (context?.previousVans) {
-        queryClient.setQueryData(['admin', 'vans', 'all'], context.previousVans);
+        queryClient.setQueryData(['admin', 'vans', 'all', session?.user?.id], context.previousVans);
       }
       setToast(`Error: ${err.message}`);
       setTimeout(() => setToast(null), 3500);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'vans', 'all'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'vans', 'all', session?.user?.id] });
       queryClient.invalidateQueries({ queryKey: ['vans', 'active'] });
     },
   });

@@ -11,13 +11,13 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 function buildCorsHeaders(requestOrigin: string): Record<string, string> {
   const allowed = Deno.env.get("ALLOWED_ORIGIN") ?? "";
 
-  const isAllowed = allowed
-    ? requestOrigin === allowed
-    : requestOrigin.startsWith("http://localhost") ||
-      requestOrigin.startsWith("http://127.0.0.1");
+  const isAllowed =
+    (allowed && requestOrigin === allowed) ||
+    requestOrigin.startsWith("http://localhost") ||
+    requestOrigin.startsWith("http://127.0.0.1");
 
   return {
-    "Access-Control-Allow-Origin": isAllowed ? requestOrigin : (allowed || ""),
+    "Access-Control-Allow-Origin": isAllowed ? requestOrigin : (allowed || "*"),
     "Access-Control-Allow-Headers":
       "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -74,11 +74,11 @@ Deno.serve(async (req: Request) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    // ── 3. Verificar rol desde tabla profiles ─────────────────────────
+    // ── 3. Verificar rol y company_id desde tabla profiles ─────────────────────────
     const { data: callerProfile, error: callerProfileError } =
       await supabaseAdmin
         .from("profiles")
-        .select("role")
+        .select("role, company_id")
         .eq("id", caller.id)
         .single();
 
@@ -106,10 +106,10 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // ── 5. Verificar jerarquía — solo se puede eliminar a workers ────────
+    // ── 5. Verificar jerarquía — solo se puede eliminar a workers de misma compañía ────────
     const { data: targetProfile, error: targetError } = await supabaseAdmin
       .from("profiles")
-      .select("role")
+      .select("role, company_id")
       .eq("id", userId)
       .single();
 
@@ -117,6 +117,13 @@ Deno.serve(async (req: Request) => {
       return new Response(
         JSON.stringify({ error: "Usuario no encontrado" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (targetProfile.company_id !== callerProfile.company_id) {
+      return new Response(
+        JSON.stringify({ error: "El usuario no pertenece a tu compañía" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 

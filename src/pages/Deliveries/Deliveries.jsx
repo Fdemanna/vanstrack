@@ -237,12 +237,17 @@ export default function Deliveries() {
   const [toast, setToast] = useState(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
+  // Filter states
+  const [filterText, setFilterText] = useState('');
+  const [filterDate, setFilterDate] = useState('');
+  const [filterVan, setFilterVan] = useState('');
+
   const queryClient = useQueryClient();
   const monthKey = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`;
 
   // Fetch de Furgonetas
   const { data: vans = [] } = useQuery({
-    queryKey: ['vans', 'active'],
+    queryKey: ['vans', 'active', session?.user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('vans')
@@ -256,7 +261,7 @@ export default function Deliveries() {
 
   // Fetch de furgonetas ya ocupadas HOY por OTROS conductores
   const { data: takenVanIds = new Set() } = useQuery({
-    queryKey: ['deliveries', 'taken-today'],
+    queryKey: ['deliveries', 'taken-today', session?.user?.id],
     queryFn: async () => {
       const todayStr = formatDate(new Date());
       const { data, error } = await supabase
@@ -300,7 +305,7 @@ export default function Deliveries() {
 
   // Fetch de Perfiles (Solo para administradores)
   const { data: profiles = {} } = useQuery({
-    queryKey: ['profiles', 'all'],
+    queryKey: ['profiles', 'all', session?.user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.from('profiles').select('id, name');
       if (error) throw error;
@@ -405,10 +410,10 @@ export default function Deliveries() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['deliveries', monthKey, session.user.id] });
-      queryClient.invalidateQueries({ queryKey: ['deliveries', 'taken-today'] });
+      queryClient.invalidateQueries({ queryKey: ['deliveries', 'taken-today', session?.user?.id] });
       queryClient.invalidateQueries({ queryKey: ['deliveries', 'my-route-today', session?.user?.id] });
       queryClient.invalidateQueries({ queryKey: ['dashboard', 'stats', session.user.id] });
-      queryClient.invalidateQueries({ queryKey: ['fleet', 'all', 'team'] });
+      queryClient.invalidateQueries({ queryKey: ['fleet', 'all', 'team', session.user.id] });
     },
     onSuccess: (data) => {
       setToast({ message: 'Ruta iniciada correctamente', type: 'success' });
@@ -443,9 +448,29 @@ export default function Deliveries() {
     createDeliveryMutation.mutate(newDeliveryData);
   }
 
+  // Filter derived state
+  const filteredDeliveries = useMemo(() => {
+    return deliveries.filter(delivery => {
+      // Búsqueda por texto en notas (case-insensitive)
+      if (filterText) {
+        const searchText = filterText.toLowerCase();
+        if (!delivery.notes?.toLowerCase().includes(searchText)) return false;
+      }
+      // Filtro por fecha (YYYY-MM-DD)
+      if (filterDate) {
+        if (delivery.date !== filterDate) return false;
+      }
+      // Filtro por furgoneta (van_id)
+      if (filterVan) {
+        if (delivery.van_id !== filterVan) return false;
+      }
+      return true;
+    });
+  }, [deliveries, filterText, filterDate, filterVan]);
+
   const totalPackages = useMemo(() => {
-    return deliveries.reduce((sum, d) => sum + Number(d.packages), 0);
-  }, [deliveries]);
+    return filteredDeliveries.reduce((sum, d) => sum + Number(d.packages), 0);
+  }, [filteredDeliveries]);
 
   return (
     <div className="page">
@@ -468,11 +493,42 @@ export default function Deliveries() {
         </button>
       </div>
 
+      {/* Filters Bar */}
       {!loading && deliveries.length > 0 ? (
+        <div className="filters-bar">
+          <input
+            type="text"
+            className="filter-input filter-input--text"
+            placeholder="Buscar en notas..."
+            value={filterText}
+            onChange={e => setFilterText(e.target.value)}
+          />
+          <input
+            type="date"
+            className="filter-input filter-input--date"
+            value={filterDate}
+            onChange={e => setFilterDate(e.target.value)}
+            min={getMonthRange(currentMonth).start}
+            max={getMonthRange(currentMonth).end}
+          />
+          <select
+            className="filter-input filter-input--select"
+            value={filterVan}
+            onChange={e => setFilterVan(e.target.value)}
+          >
+            <option value="">Todas las furgonetas</option>
+            {vans.map(v => (
+              <option key={v.id} value={v.id}>{v.label}</option>
+            ))}
+          </select>
+        </div>
+      ) : null}
+
+      {!loading && filteredDeliveries.length > 0 ? (
         <div className="summary-bar">
           <div className="summary-card">
             <div className="summary-card__value summary-card__value--count">
-              {deliveries.length}
+              {filteredDeliveries.length}
             </div>
             <div className="summary-card__label">Rutas</div>
           </div>
@@ -489,7 +545,7 @@ export default function Deliveries() {
         <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-2xl)' }}>
           <div className="spinner" />
         </div>
-      ) : deliveries.length === 0 ? (
+      ) : filteredDeliveries.length === 0 ? (
         <div className="empty-state">
           <svg className="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <rect x="1" y="3" width="15" height="13" rx="2" ry="2" />
@@ -497,16 +553,18 @@ export default function Deliveries() {
             <circle cx="5.5" cy="18.5" r="2.5" />
             <circle cx="18.5" cy="18.5" r="2.5" />
           </svg>
-          <h3 className="empty-state__title">Sin rutas este mes</h3>
+          <h3 className="empty-state__title">Sin resultados</h3>
           <p className="empty-state__text">
-            Inicia una nueva ruta con el botón +
+            {deliveries.length === 0
+              ? "Inicia una nueva ruta con el botón +"
+              : "No se encontraron rutas con estos filtros."}
           </p>
         </div>
       ) : (
         <div className="deliveries-list">
           {(() => {
             let currentDate = null;
-            return deliveries.map((delivery, index) => {
+            return filteredDeliveries.map((delivery, index) => {
               const van = vanMap[delivery.van_id];
               const workerName = profiles[delivery.user_id];
               const isPending = delivery.syncPending === true;

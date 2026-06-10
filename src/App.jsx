@@ -6,6 +6,7 @@ import LoadingScreen from './components/LoadingScreen/LoadingScreen';
 
 // Carga perezosa (Lazy Loading) de páginas para optimizar bundle size
 const Login = lazy(() => import('./pages/Login/Login'));
+const RegisterCompany = lazy(() => import('./pages/RegisterCompany/RegisterCompany'));
 const Home = lazy(() => import('./pages/Home/Home'));
 const Deliveries = lazy(() => import('./pages/Deliveries/Deliveries'));
 const Expenses = lazy(() => import('./pages/Expenses/Expenses'));
@@ -89,6 +90,15 @@ export default function App() {
               element={
                 <PublicRoute>
                   <Login />
+                </PublicRoute>
+              }
+            />
+
+            <Route
+              path="/register"
+              element={
+                <PublicRoute>
+                  <RegisterCompany />
                 </PublicRoute>
               }
             />

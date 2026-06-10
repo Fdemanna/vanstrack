@@ -141,12 +141,17 @@ export default function Expenses() {
   const [toast, setToast] = useState(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
+  // Filter states
+  const [filterText, setFilterText] = useState('');
+  const [filterDate, setFilterDate] = useState('');
+  const [filterVan, setFilterVan] = useState('');
+
   const queryClient = useQueryClient();
   const monthKey = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`;
 
   // Fetch de Furgonetas
   const { data: vans = [] } = useQuery({
-    queryKey: ['vans', 'active'],
+    queryKey: ['vans', 'active', session?.user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('vans')
@@ -160,7 +165,7 @@ export default function Expenses() {
 
   // Fetch de perfiles (para mostrar nombre del trabajador en gastos — solo admin) (A-5)
   const { data: profilesMap = {} } = useQuery({
-    queryKey: ['profiles', 'all'],
+    queryKey: ['profiles', 'all', session?.user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.from('profiles').select('id, name');
       if (error) throw error;
@@ -309,9 +314,29 @@ export default function Expenses() {
     createExpenseMutation.mutate(newExpenseData);
   }
 
+  // Filter derived state
+  const filteredExpenses = useMemo(() => {
+    return expenses.filter(expense => {
+      // Búsqueda por texto en concepto (case-insensitive)
+      if (filterText) {
+        const searchText = filterText.toLowerCase();
+        if (!expense.concept?.toLowerCase().includes(searchText)) return false;
+      }
+      // Filtro por fecha (YYYY-MM-DD)
+      if (filterDate) {
+        if (expense.date !== filterDate) return false;
+      }
+      // Filtro por furgoneta (van_id)
+      if (filterVan) {
+        if (expense.van_id !== filterVan) return false;
+      }
+      return true;
+    });
+  }, [expenses, filterText, filterDate, filterVan]);
+
   const totalAmount = useMemo(() => {
-    return expenses.reduce((sum, e) => sum + Number(e.amount), 0);
-  }, [expenses]);
+    return filteredExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
+  }, [filteredExpenses]);
 
   return (
     <div className="page">
@@ -335,18 +360,49 @@ export default function Expenses() {
         </button>
       </div>
 
-      {/* Summary */}
+      {/* Filters Bar */}
       {!loading && expenses.length > 0 ? (
+        <div className="filters-bar">
+          <input
+            type="text"
+            className="filter-input filter-input--text"
+            placeholder="Buscar concepto..."
+            value={filterText}
+            onChange={e => setFilterText(e.target.value)}
+          />
+          <input
+            type="date"
+            className="filter-input filter-input--date"
+            value={filterDate}
+            onChange={e => setFilterDate(e.target.value)}
+            min={getMonthRange(currentMonth).start}
+            max={getMonthRange(currentMonth).end}
+          />
+          <select
+            className="filter-input filter-input--select"
+            value={filterVan}
+            onChange={e => setFilterVan(e.target.value)}
+          >
+            <option value="">Todas las furgonetas</option>
+            {vans.map(v => (
+              <option key={v.id} value={v.id}>{v.label}</option>
+            ))}
+          </select>
+        </div>
+      ) : null}
+
+      {/* Summary */}
+      {!loading && filteredExpenses.length > 0 ? (
         <div className="summary-bar">
           <div className="summary-card">
             <div className="summary-card__value summary-card__value--expense">
               {totalAmount.toFixed(2)} €
             </div>
-            <div className="summary-card__label">Total mes</div>
+            <div className="summary-card__label">Total filtrado</div>
           </div>
           <div className="summary-card">
             <div className="summary-card__value summary-card__value--count">
-              {expenses.length}
+              {filteredExpenses.length}
             </div>
             <div className="summary-card__label">Registros</div>
           </div>
@@ -358,22 +414,24 @@ export default function Expenses() {
         <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-2xl)' }}>
           <div className="spinner" />
         </div>
-      ) : expenses.length === 0 ? (
+      ) : filteredExpenses.length === 0 ? (
         <div className="empty-state">
           <svg className="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="1" x2="12" y2="23" />
             <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
           </svg>
-          <h3 className="empty-state__title">Sin gastos este mes</h3>
+          <h3 className="empty-state__title">Sin resultados</h3>
           <p className="empty-state__text">
-            Registra un gasto con el botón +
+            {expenses.length === 0 
+              ? "Registra un gasto con el botón +"
+              : "No se encontraron gastos con estos filtros."}
           </p>
         </div>
       ) : (
         <div className="expenses-list">
           {(() => {
             let currentDate = null;
-            return expenses.map((expense, index) => {
+            return filteredExpenses.map((expense, index) => {
               const van = vanMap[expense.van_id];
               const isPending = expense.syncPending === true;
               const workerName = isAdmin ? profilesMap[expense.user_id] : null;

@@ -72,7 +72,7 @@ export default function Home() {
 
   // Fetch de Flota Global del Equipo — live para todos los usuarios
   const { data: fleetStatus = [], isLoading: fleetLoading } = useQuery({
-    queryKey: ['fleet', 'all', 'team'],
+    queryKey: ['fleet', 'all', 'team', session?.user?.id],
     queryFn: async () => {
       const todayStr = getTodayStr();
 

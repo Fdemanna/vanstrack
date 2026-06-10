@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
+import { useQueryClient } from '@tanstack/react-query';
 
 const AuthContext = createContext(null);
 
@@ -8,6 +9,7 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   const fetchProfile = useCallback(async (userId) => {
     try {
@@ -124,9 +126,12 @@ export function AuthProvider({ children }) {
     if (userId) {
       localStorage.removeItem(`profile_${userId}`);
     }
+    // SEC-07: Destruir absolutamente toda la caché de React Query (Memoria + IndexedDB)
+    // Esto evita que alguien lea los datos del usuario anterior desde las DevTools
+    queryClient.clear();
     setSession(null);
     setProfile(null);
-  }, [session]);
+  }, [session, queryClient]);
 
   const updateProfileName = useCallback(async (newName) => {
     if (!session?.user?.id) throw new Error('No hay sesión activa');

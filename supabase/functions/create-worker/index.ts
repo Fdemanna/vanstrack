@@ -11,14 +11,13 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 function buildCorsHeaders(requestOrigin: string): Record<string, string> {
   const allowed = Deno.env.get("ALLOWED_ORIGIN") ?? "";
 
-  // En desarrollo (sin ALLOWED_ORIGIN configurado) solo se permite localhost
-  const isAllowed = allowed
-    ? requestOrigin === allowed
-    : requestOrigin.startsWith("http://localhost") ||
-      requestOrigin.startsWith("http://127.0.0.1");
+  const isAllowed =
+    (allowed && requestOrigin === allowed) ||
+    requestOrigin.startsWith("http://localhost") ||
+    requestOrigin.startsWith("http://127.0.0.1");
 
   return {
-    "Access-Control-Allow-Origin": isAllowed ? requestOrigin : (allowed || ""),
+    "Access-Control-Allow-Origin": isAllowed ? requestOrigin : (allowed || "*"),
     "Access-Control-Allow-Headers":
       "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -79,11 +78,10 @@ Deno.serve(async (req: Request) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    // ── SEC-02: Verificar rol desde tabla profiles (fuente de verdad, protegida
-    //            por RLS) en lugar de user_metadata (mutable por el cliente) ───
+    // ── SEC-02: Verificar rol y company_id desde tabla profiles ───
     const { data: callerProfile, error: profileReadError } = await supabaseAdmin
       .from("profiles")
-      .select("role")
+      .select("role, company_id")
       .eq("id", caller.id)
       .single();
 
@@ -144,7 +142,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Actualizar perfil con username, created_by, role y password_changed = false
+    // Actualizar perfil con username, created_by, role, company_id y password_changed = false
     const { error: profileError } = await supabaseAdmin
       .from("profiles")
       .update({
@@ -152,6 +150,7 @@ Deno.serve(async (req: Request) => {
         name,
         username: usernameVal,
         created_by: caller.id,
+        company_id: callerProfile.company_id,
         password_changed: false,
       })
       .eq("id", newUser.user.id);
