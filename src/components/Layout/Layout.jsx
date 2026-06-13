@@ -47,9 +47,6 @@ export default function Layout() {
       {/* ── Mobile Top App Bar ── */}
       <header className="top-app-bar md-hidden">
         <div className="top-app-bar__inner">
-          <button className="top-app-bar__icon-btn">
-            <span className="material-symbols-outlined">menu</span>
-          </button>
           <div className="top-app-bar__title">Vantrack</div>
           <button className="top-app-bar__icon-btn">
             <span className="material-symbols-outlined">notifications</span>
