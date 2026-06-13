@@ -200,7 +200,7 @@ export default function Home() {
             {!isAdmin && !fleetStatus.some(f => f.driverId === session?.user?.id) && (
               <div className="card" style={{ marginTop: 'var(--space-sm)', borderLeft: '3px solid var(--color-warning)', padding: 'var(--space-md)' }}>
                 <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-                  ⚠️ No tienes ningún vehículo asignado hoy. Inicia una ruta en la pestaña Entregas para comenzar tu jornada.
+                  ⚠️ No tienes ningún vehículo asignado hoy. Selecciona un vehículo en la pestaña Furgonetas para comenzar tu jornada.
                 </p>
               </div>
             )}

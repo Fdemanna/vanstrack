@@ -208,7 +208,7 @@ test.describe('VanTrack v4: Pruebas de Estrés y Offline-First', () => {
     await expect(page.locator('h1.page__title')).toContainText('¡Hola, Trabajador Test!');
 
     // Ir a la pestaña de Gastos
-    await page.click('a[href="/expenses"]:visible');
+    await page.click('a[href="/app/expenses"]:visible');
     await expect(page.locator('h1.page__title')).toContainText('Gastos');
 
     // Esperar a que finalice la carga de datos inicial y desaparezca el spinner
@@ -304,11 +304,11 @@ test.describe('VanTrack v4: Pruebas de Estrés y Offline-First', () => {
     await expect(page.locator('h1.page__title')).toContainText('¡Hola, Conductor A!');
 
     // Cargar sección de Gastos
-    await page.click('a[href="/expenses"]:visible');
+    await page.click('a[href="/app/expenses"]:visible');
     await expect(page.locator('.expense-card')).toContainText('Gasto Privado A');
 
     // 2. Cerrar sesión estando online (para permitir la llamada de signOut exitosa)
-    await page.click('a[href="/profile"]:visible');
+    await page.click('a[href="/app/profile"]:visible');
     await page.click('button:has-text("Cerrar Sesión")');
     await expect(page.locator('form.login__form')).toBeVisible();
 
@@ -329,7 +329,7 @@ test.describe('VanTrack v4: Pruebas de Estrés y Offline-First', () => {
     await expect(page.locator('h1.page__title')).toContainText('¡Hola, Conductor B!');
 
     // Cargar Gastos Online para cachear
-    await page.click('a[href="/expenses"]:visible');
+    await page.click('a[href="/app/expenses"]:visible');
     await expect(page.locator('.expense-card').first()).toBeVisible();
     await expect(page.locator('.expenses-list')).toContainText('Gasto Privado B');
 
@@ -361,7 +361,7 @@ test.describe('VanTrack v4: Pruebas de Estrés y Offline-First', () => {
     await page.click('button[type="submit"]');
     await expect(page.locator('h1.page__title')).toContainText('¡Hola, Trabajador Test!');
 
-    await page.click('a[href="/expenses"]:visible');
+    await page.click('a[href="/app/expenses"]:visible');
     await expect(page.locator('.spinner')).not.toBeVisible();
     
     // Calentar la caché del selector abriendo el modal online

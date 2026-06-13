@@ -2,53 +2,27 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './Layout.css';
 
-/* ── SVG Icons (inline, zero deps) ── */
+/* ── Material Symbols ── */
 const Icons = {
-  Home: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      <polyline points="9 22 9 12 15 12 15 22" />
-    </svg>
-  ),
-  Delivery: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="1" y="3" width="15" height="13" rx="2" ry="2" />
-      <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-      <circle cx="5.5" cy="18.5" r="2.5" />
-      <circle cx="18.5" cy="18.5" r="2.5" />
-    </svg>
-  ),
-  Expense: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" y1="1" x2="12" y2="23" />
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-    </svg>
-  ),
-  Profile: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  ),
-  Admin: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    </svg>
-  ),
+  Home: <span className="material-symbols-outlined">home</span>,
+  Delivery: <span className="material-symbols-outlined">local_shipping</span>,
+  Expense: <span className="material-symbols-outlined">receipt_long</span>,
+  Profile: <span className="material-symbols-outlined">account_circle</span>,
+  Admin: <span className="material-symbols-outlined">admin_panel_settings</span>,
 };
 
 function getNavItems(isAdmin) {
   const items = [
-    { to: '/', icon: Icons.Home, label: 'Inicio' },
-    { to: '/deliveries', icon: Icons.Delivery, label: 'Furgonetas' },
-    { to: '/expenses', icon: Icons.Expense, label: 'Gastos' },
+    { to: '/app', icon: Icons.Home, label: 'Inicio' },
+    { to: '/app/deliveries', icon: Icons.Delivery, label: 'Furgonetas' },
+    { to: '/app/expenses', icon: Icons.Expense, label: 'Gastos' },
   ];
 
   if (isAdmin) {
-    items.push({ to: '/admin', icon: Icons.Admin, label: 'Admin' });
+    items.push({ to: '/app/admin', icon: Icons.Admin, label: 'Admin' });
   }
 
-  items.push({ to: '/profile', icon: Icons.Profile, label: 'Perfil' });
+  items.push({ to: '/app/profile', icon: Icons.Profile, label: 'Perfil' });
 
   return items;
 }
@@ -70,6 +44,19 @@ export default function Layout() {
 
   return (
     <div className="app-layout">
+      {/* ── Mobile Top App Bar ── */}
+      <header className="top-app-bar md-hidden">
+        <div className="top-app-bar__inner">
+          <button className="top-app-bar__icon-btn">
+            <span className="material-symbols-outlined">menu</span>
+          </button>
+          <div className="top-app-bar__title">Vantrack</div>
+          <button className="top-app-bar__icon-btn">
+            <span className="material-symbols-outlined">notifications</span>
+          </button>
+        </div>
+      </header>
+
       {/* ── Desktop Sidebar ── */}
       <aside className="sidebar">
         <div className="sidebar__brand">
@@ -84,7 +71,7 @@ export default function Layout() {
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === '/'}
+              end={item.to === '/app'}
               className={({ isActive }) =>
                 `sidebar__item ${isActive ? 'sidebar__item--active' : ''}`
               }
@@ -100,7 +87,7 @@ export default function Layout() {
             <div className="sidebar__avatar">
               {getInitials(profile?.name)}
             </div>
-            <div className="sidebar__user-info" onClick={() => navigate('/profile')}>
+            <div className="sidebar__user-info" onClick={() => navigate('/app/profile')}>
               <div className="sidebar__user-name">
                 {profile?.name || 'Usuario'}
               </div>
@@ -123,7 +110,7 @@ export default function Layout() {
           <NavLink
             key={item.to}
             to={item.to}
-            end={item.to === '/'}
+            end={item.to === '/app'}
             className={({ isActive }) =>
               `bottom-nav__item ${isActive ? 'bottom-nav__item--active' : ''}`
             }

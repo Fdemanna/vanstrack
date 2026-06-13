@@ -2,17 +2,16 @@
 
 /* ── Delivery Card ── */
 .delivery-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
+  background: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
   border-radius: var(--radius-lg);
   padding: var(--space-md);
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast);
   cursor: pointer;
 }
 
 .delivery-card:hover {
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-sm);
+  background: var(--surface-container-low);
 }
 
 .delivery-card:active {
@@ -34,12 +33,13 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 10px;
+  padding: 4px 10px;
   border-radius: var(--radius-full);
-  font-size: 0.75rem;
+  font-family: var(--font-data);
+  font-size: 12px;
   font-weight: 600;
-  background: var(--bg-surface-2);
-  border: 1px solid var(--border-subtle);
+  background: var(--secondary-container);
+  color: var(--on-secondary-container);
 }
 
 .delivery-card__van-dot {
@@ -50,8 +50,9 @@
 }
 
 .delivery-card__date {
-  font-size: 0.75rem;
-  color: var(--text-tertiary);
+  font-family: var(--font-data);
+  font-size: 14px;
+  color: var(--on-surface-variant);
   margin-left: auto;
 }
 
@@ -65,24 +66,28 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--on-surface-variant);
 }
 
 .delivery-card__stat svg {
-  width: 15px;
-  height: 15px;
-  color: var(--text-tertiary);
+  width: 16px;
+  height: 16px;
+  color: var(--outline);
 }
 
 .delivery-card__stat strong {
-  font-weight: 700;
-  color: var(--text-primary);
+  font-family: var(--font-data);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--on-surface);
 }
 
 .delivery-card__notes {
-  font-size: 0.8125rem;
-  color: var(--text-tertiary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--on-surface-variant);
   font-style: italic;
   margin-bottom: var(--space-sm);
   display: -webkit-box;
@@ -98,11 +103,12 @@
 }
 
 .delivery-detail__section-title {
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-family: var(--font-data);
+  font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-tertiary);
+  letter-spacing: 0.05em;
+  color: var(--outline);
   margin-bottom: var(--space-sm);
 }
 
@@ -113,42 +119,44 @@
 }
 
 .delivery-detail__stat-card {
-  background: var(--bg-surface-2);
+  background: var(--surface-container-low);
+  border: 1px solid var(--outline-variant);
   border-radius: var(--radius-md);
   padding: var(--space-sm) var(--space-md);
   text-align: center;
 }
 
 .delivery-detail__stat-value {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary);
 }
 
 .delivery-detail__stat-label {
-  font-size: 0.6875rem;
-  color: var(--text-tertiary);
+  font-family: var(--font-data);
+  font-size: 12px;
+  color: var(--on-surface-variant);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   font-weight: 600;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 /* ── Worker Name (admin view) ── */
 .delivery-card__worker {
-  font-size: 0.6875rem;
+  font-family: var(--font-body);
+  font-size: 12px;
   font-weight: 600;
-  color: var(--color-primary-light);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  color: var(--primary);
   margin-bottom: var(--space-xs);
 }
 
 /* ── Offline Pending Sync States ── */
 .delivery-card--pending {
   opacity: 0.7;
-  border: 1.5px dashed var(--color-warning) !important;
-  background: rgba(245, 158, 11, 0.03);
+  border: 2px dashed var(--error) !important;
+  background: var(--error-container);
 }
 
 .delivery-card__worker,
@@ -161,16 +169,17 @@
 .delivery-card__worker .sync-icon,
 .delivery-card__date .sync-icon,
 .delivery-detail__pending-banner .sync-icon {
-  width: 14px;
-  height: 14px;
-  color: var(--color-warning);
+  width: 16px;
+  height: 16px;
+  color: var(--error);
   animation: pulse-sync 2s infinite ease-in-out;
   flex-shrink: 0;
 }
 
 .delivery-card__pending-footer {
-  font-size: 0.6875rem;
-  color: var(--color-warning);
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--error);
   font-weight: 500;
   margin-top: var(--space-xs);
   display: flex;

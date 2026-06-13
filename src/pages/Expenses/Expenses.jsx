@@ -145,6 +145,7 @@ export default function Expenses() {
   const [filterText, setFilterText] = useState('');
   const [filterDate, setFilterDate] = useState('');
   const [filterVan, setFilterVan] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
   const queryClient = useQueryClient();
   const monthKey = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`;
@@ -358,10 +359,20 @@ export default function Expenses() {
         <button className="date-nav__btn" onClick={nextMonth} aria-label="Mes siguiente">
           {ChevronRight}
         </button>
+        <button 
+          className={`date-nav__btn ${showFilters ? 'date-nav__btn--active' : ''}`} 
+          style={{ marginLeft: 'auto', background: showFilters ? 'var(--color-primary-light)' : 'transparent', color: showFilters ? '#fff' : 'inherit' }}
+          onClick={() => setShowFilters(!showFilters)}
+          title="Filtros"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+        </button>
       </div>
 
       {/* Filters Bar */}
-      {!loading && expenses.length > 0 ? (
+      {!loading && expenses.length > 0 && showFilters ? (
         <div className="filters-bar">
           <input
             type="text"

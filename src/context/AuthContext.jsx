@@ -21,19 +21,8 @@ export function AuthProvider({ children }) {
 
       if (error) throw error;
       setProfile(data);
-      // Persistir solo los campos esenciales (SEC-03)
-      localStorage.setItem(`profile_${userId}`, JSON.stringify(minimalProfileCache(data)));
     } catch {
-      const cached = localStorage.getItem(`profile_${userId}`);
-      if (cached) {
-        try {
-          setProfile(JSON.parse(cached));
-        } catch {
-          setProfile(null);
-        }
-      } else {
-        setProfile(null);
-      }
+      setProfile(null);
     } finally {
       setLoading(false);
     }
@@ -63,16 +52,7 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe();
   }, [fetchProfile]);
 
-  // SEC-03: solo persistir los campos mínimos necesarios para modo offline
-  // El rol es necesario para saber si es admin offline; se excluyen metadatos innecesarios
-  function minimalProfileCache(profile) {
-    return {
-      id: profile.id,
-      name: profile.name,
-      role: profile.role,
-      password_changed: profile.password_changed,
-    };
-  }
+
 
   const signIn = useCallback(async (emailOrUsername, password) => {
     const isEmail = emailOrUsername.includes('@');
@@ -120,12 +100,8 @@ export function AuthProvider({ children }) {
   }, [fetchProfile]);
 
   const signOut = useCallback(async () => {
-    const userId = session?.user?.id;
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
-    if (userId) {
-      localStorage.removeItem(`profile_${userId}`);
-    }
     // SEC-07: Destruir absolutamente toda la caché de React Query (Memoria + IndexedDB)
     // Esto evita que alguien lea los datos del usuario anterior desde las DevTools
     queryClient.clear();
@@ -144,8 +120,6 @@ export function AuthProvider({ children }) {
     
     if (error) throw error;
     setProfile(data);
-    // Sincronizar la caché offline con el nombre actualizado (solo campos mínimos)
-    localStorage.setItem(`profile_${session.user.id}`, JSON.stringify(minimalProfileCache(data)));
     return data;
   }, [session]);
 

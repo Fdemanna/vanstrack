@@ -7,6 +7,15 @@ async function mockSupabaseRegister(page, options = {}) {
     email = 'registrado@local.vanstrack',
   } = options;
 
+  // Interceptar Edge Function: register-company
+  await page.route(url => url.pathname.includes('/functions/v1/register-company'), async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: true })
+    });
+  });
+
   // Interceptar Auth: signup
   await page.route(url => url.pathname.includes('/auth/v1/signup'), async (route) => {
     await route.fulfill({
@@ -87,19 +96,18 @@ test.describe('VanTrack v4: Registro de Cuentas', () => {
     await expect(page.locator('.login__title')).toContainText('Iniciar Sesión');
 
     // 2. Cambiar a modo registro
-    await page.click('button:has-text("¿No tienes cuenta? Regístrate")');
-    await expect(page.locator('.login__title')).toContainText('Crear Cuenta');
+    await page.click('a:has-text("Registra tu empresa")');
+    await expect(page.locator('.login__title')).toContainText('Nueva Empresa');
 
-    // 3. Rellenar formulario de registro
-    await page.fill('input#register-name', 'Registrado Test');
-    await page.fill('input#login-email', 'registrado');
-    await page.fill('input#login-password', 'password123');
-    await page.fill('input#login-confirm-password', 'password123');
+    await page.fill('input#reg-company', 'Logística Express Test');
+    await page.fill('input#reg-name', 'Registrado Test');
+    await page.fill('input#reg-email', 'registrado@local.vanstrack');
+    await page.fill('input#reg-password', 'password123');
 
     // 4. Enviar formulario
     await page.click('button[type="submit"]');
 
-    // 5. Esperar redirección al Home e inicio automático
-    await expect(page.locator('h1.page__title')).toContainText('¡Hola, Registrado Test!');
+    // 5. Esperar pantalla de éxito de registro
+    await expect(page.locator('.login__title')).toContainText('¡Empresa Registrada!');
   });
 });

@@ -125,13 +125,17 @@ Deno.serve(async (req: Request) => {
       : `${username.trim().toLowerCase()}@local.vanstrack`;
     const usernameVal = isEmail ? null : username.trim().toLowerCase();
 
-    // ── 4. Crear usuario con service_role (salta RLS) ─────────────────────────
+    // ── 4. Crear usuario con service_role (Transacción atómica vía Trigger DB) ──
     const { data: newUser, error: createError } =
       await supabaseAdmin.auth.admin.createUser({
         email: emailVal,
         password,
         email_confirm: true,
-        user_metadata: { role, name },
+        user_metadata: { 
+          role, 
+          name,
+          company_id: callerProfile.company_id 
+        },
       });
 
     if (createError) {
@@ -142,7 +146,8 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Actualizar perfil con username, created_by, role, company_id y password_changed = false
+    // El Trigger DB ya creó el perfil con company_id.
+    // Solo actualizamos metadatos extra (username, created_by).
     const { error: profileError } = await supabaseAdmin
       .from("profiles")
       .update({
@@ -156,12 +161,7 @@ Deno.serve(async (req: Request) => {
       .eq("id", newUser.user.id);
 
     if (profileError) {
-      // Rollback: eliminar el usuario si falla la actualización del perfil
-      await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
-      return new Response(
-        JSON.stringify({ error: `Error al actualizar perfil: ${profileError.message}` }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.warn("No se pudieron actualizar metadatos extra:", profileError);
     }
 
     // ── 5. Respuesta exitosa ──────────────────────────────────────────────────

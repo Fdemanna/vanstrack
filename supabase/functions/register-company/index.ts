@@ -52,62 +52,59 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Cliente Admin para bypass RLS
+    // Cliente Admin para bypass RLS (necesario para rate limits y createUser)
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    // 1. Crear compañía
-    const { data: company, error: companyError } = await supabaseAdmin
-      .from("companies")
-      .insert({ name: companyName })
-      .select("id")
-      .single();
+    // ── RATE LIMITING BASADO EN IP ──────────────────────────────────────────
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    if (ip !== "unknown") {
+      const { data: limitData } = await supabaseAdmin
+        .from("registration_logs")
+        .select("*")
+        .eq("ip", ip)
+        .single();
 
-    if (companyError || !company) {
-      return new Response(
-        JSON.stringify({ error: "Error al crear la compañía" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      const now = Date.now();
+      if (limitData) {
+        const lastAttempt = new Date(limitData.last_attempt).getTime();
+        // Reset attempts si pasó más de 1 hora
+        if (now - lastAttempt > 3600000) {
+          await supabaseAdmin.from("registration_logs").update({ attempts: 1, last_attempt: new Date().toISOString() }).eq("ip", ip);
+        } else if (limitData.attempts >= 5) {
+          return new Response(
+            JSON.stringify({ error: "Demasiados intentos. Intente más tarde." }),
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        } else {
+          await supabaseAdmin.from("registration_logs").update({ attempts: limitData.attempts + 1, last_attempt: new Date().toISOString() }).eq("ip", ip);
+        }
+      } else {
+        await supabaseAdmin.from("registration_logs").insert({ ip, attempts: 1 });
+      }
     }
 
-    // 2. Crear usuario Admin (Auth)
-    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+    // ── CREACIÓN DE USUARIO (Transacción Atómica vía Trigger DB) ──────────────
+    // Al pasar `company_name`, el trigger en `auth.users` creará automáticamente
+    // la tabla `companies` y `profiles`, sin riesgo de registros huérfanos.
+    const { error: createError } = await supabaseAdmin.auth.admin.createUser({
       email: email.trim().toLowerCase(),
       password,
       email_confirm: true,
-      user_metadata: { role: 'admin', name: adminName },
+      user_metadata: { 
+        role: 'admin', 
+        name: adminName,
+        company_name: companyName 
+      },
     });
 
     if (createError) {
-      await supabaseAdmin.from("companies").delete().eq("id", company.id);
       return new Response(
         JSON.stringify({ error: createError.message }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // 3. Actualizar o crear perfil con company_id
-    const { error: profileError } = await supabaseAdmin
-      .from("profiles")
-      .upsert({
-        id: newUser.user.id,
-        role: "admin",
-        name: adminName,
-        company_id: company.id,
-        password_changed: true,
-      })
-      .select()
-      .single();
-
-    if (profileError) {
-      await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
-      await supabaseAdmin.from("companies").delete().eq("id", company.id);
-      return new Response(
-        JSON.stringify({ error: "Error al actualizar perfil de administrador" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 

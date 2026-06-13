@@ -6,54 +6,23 @@
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-md);
   margin-bottom: var(--space-lg);
-  animation: fadeUp 0.3s ease;
 }
 
 .dashboard-card {
-  position: relative;
-  background: rgba(26, 26, 38, 0.4);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-xl);
-  padding: var(--space-lg);
+  background: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   min-height: 120px;
-  overflow: hidden;
-  transition: all var(--transition-base);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-}
-
-.dashboard-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.03), transparent 70%);
-  pointer-events: none;
-}
-
-.dashboard-card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(99, 102, 241, 0.1);
-  transform: translateY(-2px);
-}
-
-.dashboard-card--full {
-  grid-column: span 2;
-  gap: var(--space-sm);
 }
 
 .dashboard-card__header {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  color: var(--text-secondary);
-  z-index: 1;
 }
 
 .dashboard-card__icon {
@@ -62,52 +31,44 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: var(--radius-full);
-  background: var(--bg-surface-2);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  background: var(--secondary-container);
+  color: var(--on-secondary-container);
 }
 
 .dashboard-card__icon svg {
-  width: 16px;
-  height: 16px;
-  display: block;
+  width: 18px;
+  height: 18px;
 }
 
 .dashboard-card__title {
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-family: var(--font-data);
+  font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-tertiary);
+  letter-spacing: 0.05em;
+  color: var(--on-surface-variant);
 }
 
 .dashboard-card__value {
   font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--text-primary);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--on-surface);
   margin-top: var(--space-md);
-  letter-spacing: -0.02em;
-  z-index: 1;
-  background: linear-gradient(to bottom right, #ffffff, #a5b4fc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 /* Active Fleet / Assignments */
 .fleet-section {
   margin-top: var(--space-lg);
-  animation: fadeUp 0.4s ease;
 }
 
 .fleet-section__title {
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-family: var(--font-headline);
+  font-size: 20px;
+  font-weight: 600;
   margin-bottom: var(--space-md);
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
+  color: var(--on-surface);
 }
 
 .fleet-list {
@@ -121,80 +82,84 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-md);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  transition: border-color var(--transition-fast);
-}
-
-.fleet-item:hover {
-  border-color: var(--border-default);
+  background: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-sm);
 }
 
 .fleet-item__van {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  font-size: 0.875rem;
+  font-family: var(--font-body);
+  font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--on-surface);
 }
 
 .fleet-item__color {
   width: 10px;
   height: 10px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-round);
   flex-shrink: 0;
 }
 
 .fleet-item__driver {
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
+  font-family: var(--font-data);
+  font-size: 12px;
+  color: var(--on-surface-variant);
 }
 
 .fleet-item__driver strong {
-  color: var(--text-primary);
+  color: var(--on-surface);
 }
 
 .fleet-item__driver--empty {
-  color: var(--color-success-light);
+  color: var(--on-surface-variant);
+  font-family: var(--font-data);
+  font-size: 11px;
   font-weight: 600;
-  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: rgba(16, 185, 129, 0.1);
-  padding: 2px 8px;
+  background: var(--surface-container-high);
+  padding: 4px 10px;
   border-radius: var(--radius-full);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .fleet-item__driver--active {
-  color: var(--color-warning-light);
+  color: var(--on-warning-container);
+  font-family: var(--font-data);
+  font-size: 11px;
   font-weight: 600;
-  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: rgba(245, 158, 11, 0.1);
-  padding: 2px 8px;
+  background: var(--warning-container);
+  padding: 4px 10px;
   border-radius: var(--radius-full);
-  border: 1px solid rgba(245, 158, 11, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* ── Tu Vehículo highlight ── */
 .fleet-item--mine {
-  background: rgba(99, 102, 241, 0.06);
-  border-radius: var(--radius-md);
+  background: var(--primary-container);
+  border-color: var(--outline-variant);
 }
 
 .fleet-item__mine-badge {
-  font-size: 0.65rem;
+  font-family: var(--font-data);
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-accent);
-  background: rgba(99, 102, 241, 0.15);
-  border: 1px solid rgba(99, 102, 241, 0.3);
-  padding: 1px 7px;
-  border-radius: var(--radius-full);
+  letter-spacing: 0.05em;
+  color: var(--on-primary-container);
+  background: var(--surface-container-lowest);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
   margin-left: 6px;
+  border: 1px solid var(--outline-variant);
 }

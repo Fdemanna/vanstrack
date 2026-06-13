@@ -1,38 +1,42 @@
 /* ── Profile Page ── */
 .profile-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xl);
+  background: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
 .profile-card__header {
   padding: var(--space-xl) var(--space-md);
-  background:
-    linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(34, 211, 238, 0.08));
+  background: var(--secondary-container);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-sm);
+  border-bottom: 1px solid var(--outline-variant);
 }
 
 .profile-card__avatar {
-  width: 72px;
-  height: 72px;
+  width: 80px;
+  height: 80px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  background: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: white;
-  box-shadow: 0 0 24px var(--color-primary-glow);
+  font-family: var(--font-body);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--on-primary);
+  border: 4px solid var(--surface-container-lowest);
+  box-shadow: var(--shadow-sm);
 }
 
 .profile-card__name {
-  font-size: 1.25rem;
+  font-family: var(--font-display);
+  font-size: 20px;
   font-weight: 700;
+  color: var(--on-surface);
 }
 
 .profile-card__body {
@@ -47,22 +51,25 @@
 }
 
 .profile-card__row + .profile-card__row {
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--surface-container-high);
 }
 
 .profile-card__row-label {
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--on-surface-variant);
 }
 
 .profile-card__row-value {
-  font-size: 0.875rem;
+  font-family: var(--font-body);
+  font-size: 14px;
   font-weight: 600;
+  color: var(--on-surface);
 }
 
 .profile-card__actions {
   padding: var(--space-md);
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--surface-container-high);
 }
 
 .profile-card__name-wrapper {
@@ -77,19 +84,19 @@
 .profile-card__edit-btn {
   background: none;
   border: none;
-  color: var(--text-tertiary);
+  color: var(--on-surface-variant);
   cursor: pointer;
   padding: 6px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .profile-card__edit-btn:hover {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.05);
+  color: var(--primary);
+  background: var(--surface-container-lowest);
 }
 
 .profile-card__edit-btn svg {
@@ -108,9 +115,8 @@
 
 .profile-card__edit-input {
   flex: 1;
-  padding: var(--space-xs) var(--space-sm);
-  font-size: 0.95rem;
-  height: 38px;
+  font-size: 14px;
+  height: 40px;
 }
 
 .profile-card__edit-actions {
@@ -119,8 +125,9 @@
 }
 
 .profile-card__error {
-  color: var(--color-danger);
-  font-size: 0.75rem;
+  color: var(--error);
+  font-family: var(--font-body);
+  font-size: 12px;
   margin-top: var(--space-xs);
   text-align: center;
   width: 100%;

@@ -13,6 +13,7 @@ const Expenses = lazy(() => import('./pages/Expenses/Expenses'));
 const Profile = lazy(() => import('./pages/Profile/Profile'));
 const Admin = lazy(() => import('./pages/Admin/Admin'));
 const ForcePasswordChange = lazy(() => import('./pages/ForcePasswordChange/ForcePasswordChange'));
+const Landing = lazy(() => import('./pages/Landing/Landing'));
 
 function ProtectedRoute({ children }) {
   const { session, profile, loading } = useAuth();
@@ -44,7 +45,7 @@ function ForcePasswordProtectedRoute({ children }) {
   }
 
   if (profile && profile.password_changed !== false) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/app" replace />;
   }
 
   return children;
@@ -58,7 +59,7 @@ function PublicRoute({ children }) {
   }
 
   if (session) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/app" replace />;
   }
 
   return children;
@@ -72,7 +73,7 @@ function AdminRoute({ children }) {
   }
 
   if (!isAdmin) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/app" replace />;
   }
 
   return children;
@@ -112,8 +113,12 @@ export default function App() {
               }
             />
 
+            {/* Landing Page */}
+            <Route path="/" element={<Landing />} />
+
             {/* Protected — App Shell */}
             <Route
+              path="/app"
               element={
                 <ProtectedRoute>
                   <Layout />
